@@ -37,7 +37,7 @@ For the full documentation, please visit the [GitHub Repository Wiki](https://gi
 ### Getting Started
 
 - Deno >= v1.35.0
-  - **`allow-net` (Allow Network Addresses):** *Resource Domains*
+  - **`allow-net` (Allow Network Addresses):** *Resources Domain*
 
 ```ts
 /* Either */
