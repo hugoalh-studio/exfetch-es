@@ -57,12 +57,12 @@ export class HTTPHeaderLink {
 		for (let cursor = 0; cursor < valueResolve.length; cursor += 1) {
 			cursor += cursorWhitespaceSkipper(valueResolve, cursor);
 			if (valueResolve.charAt(cursor) !== "<") {
-				throw new SyntaxError(`Unexpected character at position ${cursor}!`);
+				throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character "<"!`);
 			}
 			cursor += 1;
 			let cursorEndURI: number = valueResolve.indexOf(">", cursor);
 			if (cursorEndURI === -1) {
-				throw new SyntaxError(`Missing end of URI delimiter character after position ${cursor}!`);
+				throw new SyntaxError(`Missing end of URI delimiter character ">" after position ${cursor}!`);
 			}
 			if (cursorEndURI === cursor) {
 				throw new SyntaxError(`Missing URI at position ${cursor}!`);
@@ -81,13 +81,13 @@ export class HTTPHeaderLink {
 				continue;
 			}
 			if (valueResolve.charAt(cursor) !== ";") {
-				throw new SyntaxError(`Unexpected character at position ${cursor}!`);
+				throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character ";"!`);
 			}
 			while (cursor < valueResolve.length) {
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
 				let parameterName: string | undefined = valueResolve.slice(cursor).match(/^[\w-]+?\*?/u)?.[0].toLowerCase();
 				if (typeof parameterName === "undefined") {
-					throw new SyntaxError(`Unexpected character at position ${cursor}!`);
+					throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect a valid parameter name!`);
 				}
 				cursor += parameterName.length;
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
@@ -105,7 +105,7 @@ export class HTTPHeaderLink {
 					continue;
 				}
 				if (valueResolve.charAt(cursor) !== "=") {
-					throw new SyntaxError(`Unexpected character at position ${cursor}!`);
+					throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character "="!`);
 				}
 				cursor += 1;
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
@@ -146,7 +146,7 @@ export class HTTPHeaderLink {
 						cursor += 1;
 						continue;
 					}
-					throw new SyntaxError(`Unexpected character at position ${cursor}!`);
+					throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character "," or ";", or end of the string!`);
 				}
 			}
 			for (let [name, value] of Object.entries(parameters)) {
