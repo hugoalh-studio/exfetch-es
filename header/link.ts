@@ -83,6 +83,7 @@ export class HTTPHeaderLink {
 			if (valueResolve.charAt(cursor) !== ";") {
 				throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character ";"!`);
 			}
+			cursor += 1;
 			while (cursor < valueResolve.length) {
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
 				let parameterName: string | undefined = valueResolve.slice(cursor).match(/^[\w-]+?\*?/u)?.[0].toLowerCase();
