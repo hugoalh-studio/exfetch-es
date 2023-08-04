@@ -12,11 +12,21 @@ interface ExFetchPaginateOptionsBase {
 	count: number;
 	/**
 	 * Custom link up to the next page, useful for the endpoints which not correctly return an absolute or relative URL.
-	 * @param {URL} current URL of the current page.
-	 * @param {string} next Link of the next page.
+	 * @param {URL} currentURL URL of the current page.
+	 * @param {HTTPHeaderLink} currentHeaderLink Header link of the current page.
 	 * @returns {URL} URL of the next page.
 	 */
-	linkUpNextPage?: (current: URL, next: string) => URL;
+	linkUpNextPage?: (currentURL: URL, currentHeaderLink: HTTPHeaderLink) => URL;
+	/**
+	 * Pause between pages resource request, by milliseconds.
+	 * @default 0 // (Disable)
+	 */
+	pause: number;
+	/**
+	 * Whether to throw an error when the latest page response provide an invalid HTTP header link.
+	 * @default true
+	 */
+	throwOnInvalidHeaderLink: boolean;
 }
 export interface ExFetchPaginateOptions extends Partial<ExFetchPaginateOptionsBase> { }
 interface ExFetchRetryOptionsBase {
@@ -128,7 +138,9 @@ export interface ExFetchEventOnRetryPayload {
 export class ExFetch {
 	#event?: EventEmitter;
 	#paginate: ExFetchPaginateOptionsBase = {
-		count: Infinity
+		count: Infinity,
+		pause: 0,
+		throwOnInvalidHeaderLink: true
 	};
 	#retry: ExFetchRetryOptionsBase = {
 		attempts: 4,
@@ -141,18 +153,29 @@ export class ExFetch {
 	/**
 	 * @access private
 	 * @param {ExFetchPaginateOptions} options
+	 * @param {string} prefix
 	 * @returns {void}
 	 */
-	#checkPaginateOptions(options: ExFetchPaginateOptions): void {
+	#checkPaginateOptions(options: ExFetchPaginateOptions, prefix: string): void {
 		if (typeof options.count === "number" && !Number.isNaN(options.count)) {
 			if (options.count !== Infinity && !(Number.isSafeInteger(options.count) && options.count > 0)) {
-				throw new RangeError(`Argument \`options.count\` must be a number which is integer, positive, safe, and > 0!`);
+				throw new RangeError(`Argument \`${prefix}.count\` must be a number which is integer, positive, safe, and > 0!`);
 			}
 		} else if (typeof options.count !== "undefined") {
-			throw new TypeError(`Argument \`options.count\` must be type of number or undefined!`);
+			throw new TypeError(`Argument \`${prefix}.count\` must be type of number or undefined!`);
 		}
 		if (typeof options.linkUpNextPage !== "function" && typeof options.linkUpNextPage !== "undefined") {
-			throw new TypeError(`Argument \`options.linkUpNextPage\` must be type of function or undefined!`);
+			throw new TypeError(`Argument \`${prefix}.linkUpNextPage\` must be type of function or undefined!`);
+		}
+		if (typeof options.pause === "number" && !Number.isNaN(options.pause)) {
+			if (!(Number.isSafeInteger(options.pause) && options.pause >= 0)) {
+				throw new RangeError(`Argument \`${prefix}.pause\` must be a number which is integer, positive, and safe!`);
+			}
+		} else if (typeof options.pause !== "undefined") {
+			throw new TypeError(`Argument \`${prefix}.pause\` must be type of number or undefined!`);
+		}
+		if (typeof options.throwOnInvalidHeaderLink !== "boolean" && typeof options.throwOnInvalidHeaderLink !== "undefined") {
+			throw new TypeError(`Argument \`${prefix}.throwOnInvalidHeaderLink\` must be type of boolean or undefined!`);
 		}
 	}
 	/**
@@ -170,7 +193,7 @@ export class ExFetch {
 		} else if (typeof options.event !== "undefined") {
 			throw new TypeError(`Argument \`options.event\` must be instance of EventEmitter or type of undefined!`);
 		}
-		this.#checkPaginateOptions(options.paginate ?? {});
+		this.#checkPaginateOptions(options.paginate ?? {}, "options.paginate");
 		this.#paginate = { ...this.#paginate, ...options.paginate };
 		if (typeof options.retry.attempts === "number" && !Number.isNaN(options.retry.attempts)) {
 			if (!(Number.isSafeInteger(options.retry.attempts) && options.retry.attempts >= 0)) {
@@ -300,26 +323,38 @@ export class ExFetch {
 	 * Fetch paginate resources from the network with retry attempts; Not support GraphQL.
 	 * @param {Exclude<Parameters<typeof fetch>[0], Request>} input URL of the first page of the resources.
 	 * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
-	 * @param {ExFetchPaginateOptions} [options={}] Options.
+	 * @param {ExFetchPaginateOptions} [optionsOverride={}] Options.
 	 * @returns {Promise<Response[]>} Responses.
 	 */
-	async fetchPaginate(input: Exclude<Parameters<typeof fetch>[0], Request>, init?: Parameters<typeof fetch>[1], options: ExFetchPaginateOptions = {}): Promise<Response[]> {
-		this.#checkPaginateOptions(options);
-		let optionsResolve: ExFetchPaginateOptionsBase = { ...this.#paginate, ...options };
+	async fetchPaginate(input: Exclude<Parameters<typeof fetch>[0], Request>, init?: Parameters<typeof fetch>[1], optionsOverride: ExFetchPaginateOptions = {}): Promise<Response[]> {
+		this.#checkPaginateOptions(optionsOverride, "optionsOverride");
+		let optionsResolve: ExFetchPaginateOptionsBase = { ...this.#paginate, ...optionsOverride };
 		let signal: AbortSignal | undefined = init?.signal ?? undefined;// `undefined` is necessary to omit `null`.
 		if (this.#timeout !== Infinity) {
 			signal ??= AbortSignal.timeout(this.#timeout);
 		}
 		let responses: Response[] = [];
 		for (let page = 1, uri: URL | undefined = new URL(input); page <= optionsResolve.count && uri instanceof URL; page += 1) {
+			if (page > 1 && optionsResolve.pause > 0) {
+				await delay(optionsResolve.pause, { signal });
+			}
 			let uriLookUp: URL = uri;
 			uri = undefined;
 			let response: Response = await this.fetch(uriLookUp, { ...init, signal });
 			responses.push(response);
 			if (response.ok) {
 				try {
-					uri = new URL(HTTPHeaderLink.parse(response).getByRel("next")[0][0], uriLookUp);
-				} catch { }
+					let responseHeaderLink: HTTPHeaderLink = HTTPHeaderLink.parse(response);
+					if (typeof optionsResolve.linkUpNextPage === "function") {
+						uri = optionsResolve.linkUpNextPage(uriLookUp, responseHeaderLink);
+					} else {
+						uri = new URL(responseHeaderLink.getByRel("next")[0][0], uriLookUp);
+					}
+				} catch (error) {
+					if (optionsResolve.throwOnInvalidHeaderLink) {
+						throw new SyntaxError(`[${uriLookUp.toString()}] ${error?.message ?? error}`);
+					}
+				}
 			}
 		}
 		return responses;
