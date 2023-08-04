@@ -86,7 +86,7 @@ export class HTTPHeaderLink {
 			cursor += 1;
 			while (cursor < valueResolve.length) {
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
-				let parameterName: string | undefined = valueResolve.slice(cursor).match(/^[\w-]+?\*?/u)?.[0].toLowerCase();
+				let parameterName: string | undefined = valueResolve.slice(cursor).match(/^[\w-]+\*?/u)?.[0].toLowerCase();
 				if (typeof parameterName === "undefined") {
 					throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect a valid parameter name!`);
 				}
