@@ -97,7 +97,6 @@ export class HTTPHeaderLink {
 					valueResolve.charAt(cursor) === ","
 				) {
 					parameters[parameterName] = "";
-					cursor += 1;
 					break;
 				}
 				if (valueResolve.charAt(cursor) === ";") {
@@ -128,27 +127,25 @@ export class HTTPHeaderLink {
 					let cursorDiffParameterValue: number = valueResolve.slice(cursor).search(/[\s;,]/u);
 					if (cursorDiffParameterValue === -1) {
 						parameterValue += valueResolve.slice(cursor);
-						parameters[parameterName] = parameterValue;
 						cursor += parameterValue.length;
-						break;
+					} else {
+						parameterValue += valueResolve.slice(cursor, cursorDiffParameterValue);
+						cursor += cursorDiffParameterValue;
 					}
-					parameterValue += valueResolve.slice(cursor, cursorDiffParameterValue);
-					parameters[parameterName] = parameterValue;
-					cursor += cursorDiffParameterValue;
-					cursor += cursorWhitespaceSkipper(valueResolve, cursor);
-					if (
-						cursor === valueResolve.length ||
-						valueResolve.charAt(cursor) === ","
-					) {
-						cursor += 1;
-						break;
-					}
-					if (valueResolve.charAt(cursor) === ";") {
-						cursor += 1;
-						continue;
-					}
-					throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character "," or ";", or end of the string!`);
 				}
+				parameters[parameterName] = parameterValue;
+				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
+				if (
+					cursor === valueResolve.length ||
+					valueResolve.charAt(cursor) === ","
+				) {
+					break;
+				}
+				if (valueResolve.charAt(cursor) === ";") {
+					cursor += 1;
+					continue;
+				}
+				throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character "," or ";", or end of the string!`);
 			}
 			for (let [name, value] of Object.entries(parameters)) {
 				if (parametersNeedLowerCaseValue.has(name)) {
