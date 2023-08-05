@@ -26,9 +26,9 @@ This project is inspired from:
 
 ### 🌟 Feature
 
-- Build in paginate resolve.
 - Build in random retry delay.
 - Build in retry.
+- Simplify paginate requests.
 
 ## 📚 Documentation (Excerpt)
 
