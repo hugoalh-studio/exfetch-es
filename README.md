@@ -27,8 +27,8 @@ This project is inspired from:
 ### 🌟 Feature
 
 - Build in random retry delay.
-- Build in retry.
-- Simplify paginate requests.
+- Build in retry request.
+- Build in simplify paginate requests.
 
 ## 📚 Documentation (Excerpt)
 
@@ -48,7 +48,7 @@ import exFetch from "<URL>";// Default Import (Function `exFetch`)
 
 | **Domain / Registry** | **URL** |
 |:-:|:--|
-| Deno Land | *N/A* |
+| [Deno Land](https://deno.land/x/exfetch) | `https://deno.land/x/exfetch[@<Tag>]/mod.ts` |
 | DenoPKG | `https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts` |
 | GitHub Raw **\*** | `https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts` |
 | Pax | `https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts` |
