@@ -18,7 +18,7 @@ interface ExFetchPaginateOptionsBase {
 	 */
 	linkUpNextPage?: (currentURL: URL, currentHeaderLink: HTTPHeaderLink) => URL;
 	/**
-	 * Pause between pages resource request, by milliseconds.
+	 * Amount of time to pause between pages resource request, by milliseconds.
 	 * @default 0 // (Disable)
 	 */
 	pause: number;
@@ -65,27 +65,27 @@ interface ExFetchRetryOptionsBase {
 	jitter: number;
 }
 export interface ExFetchRetryOptions extends Partial<ExFetchRetryOptionsBase> {
-	/** @alias attempts */attemptsMax?: number;
-	/** @alias attempts */attemptsMaximum?: number;
-	/** @alias attempts */maxAttempts?: number;
-	/** @alias attempts */maximumAttempts?: number;
-	/** @alias backoffMultiplier */backoffMultiply?: number;
-	/** @alias backoffMultiplier */multiplier?: number;
-	/** @alias backoffMultiplier */multiply?: number;
-	/** @alias delayMaximum */delayMax?: number;
-	/** @alias delayMaximum */maxDelay?: number;
-	/** @alias delayMaximum */maximumDelay?: number;
-	/** @alias delayMaximum */maximumTimeout?: number;
-	/** @alias delayMaximum */maxTimeout?: number;
-	/** @alias delayMaximum */timeoutMax?: number;
-	/** @alias delayMaximum */timeoutMaximum?: number;
-	/** @alias delayMinimum */delayMin?: number;
-	/** @alias delayMinimum */minDelay?: number;
-	/** @alias delayMinimum */minimumDelay?: number;
-	/** @alias delayMinimum */minimumTimeout?: number;
-	/** @alias delayMinimum */minTimeout?: number;
-	/** @alias delayMinimum */timeoutMin?: number;
-	/** @alias delayMinimum */timeoutMinimum?: number;
+	/** @alias attempts */attemptsMax?: ExFetchRetryOptionsBase["attempts"];
+	/** @alias attempts */attemptsMaximum?: ExFetchRetryOptionsBase["attempts"];
+	/** @alias attempts */maxAttempts?: ExFetchRetryOptionsBase["attempts"];
+	/** @alias attempts */maximumAttempts?: ExFetchRetryOptionsBase["attempts"];
+	/** @alias backoffMultiplier */backoffMultiply?: ExFetchRetryOptionsBase["backoffMultiplier"];
+	/** @alias backoffMultiplier */multiplier?: ExFetchRetryOptionsBase["backoffMultiplier"];
+	/** @alias backoffMultiplier */multiply?: ExFetchRetryOptionsBase["backoffMultiplier"];
+	/** @alias delayMaximum */delayMax?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMaximum */maxDelay?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMaximum */maximumDelay?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMaximum */maximumTimeout?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMaximum */maxTimeout?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMaximum */timeoutMax?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMaximum */timeoutMaximum?: ExFetchRetryOptionsBase["delayMaximum"];
+	/** @alias delayMinimum */delayMin?: ExFetchRetryOptionsBase["delayMinimum"];
+	/** @alias delayMinimum */minDelay?: ExFetchRetryOptionsBase["delayMinimum"];
+	/** @alias delayMinimum */minimumDelay?: ExFetchRetryOptionsBase["delayMinimum"];
+	/** @alias delayMinimum */minimumTimeout?: ExFetchRetryOptionsBase["delayMinimum"];
+	/** @alias delayMinimum */minTimeout?: ExFetchRetryOptionsBase["delayMinimum"];
+	/** @alias delayMinimum */timeoutMin?: ExFetchRetryOptionsBase["delayMinimum"];
+	/** @alias delayMinimum */timeoutMinimum?: ExFetchRetryOptionsBase["delayMinimum"];
 }
 export interface ExFetchOptions {
 	/**
@@ -286,16 +286,16 @@ export class ExFetch {
 				break;
 			}
 			let delayTime: number;
-			for (let headerName of ["Retry-After", "x-ratelimit-reset"]) {
-				let value: string | null = response.headers.get(headerName);
-				if (typeof value === "string") {
-					if (/^[1-9]\d*$/u.test(value)) {
-						delayTime ??= Number(value) * 1000;
-					} else {
-						try {
-							delayTime ??= Date.parse(value) - Date.now();
-						} catch { }
-					}
+			let headerRetryAfterValue: string | null = response.headers.get("Retry-After");
+			if (typeof headerRetryAfterValue === "string") {
+				if (/^[A-Z][a-z][a-z], \d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d GMT$/u.test(headerRetryAfterValue)) {
+					try {
+						delayTime ??= Date.parse(headerRetryAfterValue) - Date.now();
+					} catch { }
+				} else {
+					try {
+						delayTime ??= Number(headerRetryAfterValue) * 1000;
+					} catch { }
 				}
 			}
 			delayTime ??= exponentialBackoffWithJitter({
