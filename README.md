@@ -15,12 +15,12 @@ This project is inspired from:
 - [node-fetch/node-fetch](https://github.com/node-fetch/node-fetch)
 - [octokit/plugin-paginate-rest.js](https://github.com/octokit/plugin-paginate-rest.js)
 - [octokit/plugin-retry.js](https://github.com/octokit/plugin-retry.js)
+- [thlorenz/parse-link-header](https://github.com/thlorenz/parse-link-header)
 
 ## 🌟 Feature
 
-- Build in random retry delay.
-- Build in retry request.
-- Build in simplify paginate requests.
+- Automatically retry with the response header `Retry-After` or the jitter based delay.
+- Simplify paginate requests.
 
 ## 📓 Documentation (Excerpt)
 
