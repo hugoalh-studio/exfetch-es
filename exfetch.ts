@@ -272,6 +272,12 @@ export class ExFetch {
 		let response: Response;
 		do {
 			response = await fetch(input, { ...init, signal });
+			if (
+				response.ok ||
+				attempt >= this.#retry.attempts
+			) {
+				break;
+			}
 			let retryable: boolean = statusCodeRetryable.has(response.status);
 			if (typeof this.#retry.condition === "function") {
 				if (!this.#retry.condition(response.status, retryable)) {
@@ -281,9 +287,6 @@ export class ExFetch {
 				if (!retryable) {
 					break;
 				}
-			}
-			if (attempt >= this.#retry.attempts) {
-				break;
 			}
 			let delayTime: number;
 			let headerRetryAfterValue: string | null = response.headers.get("Retry-After");
