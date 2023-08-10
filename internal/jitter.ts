@@ -9,7 +9,7 @@ interface ExponentialBackoffWithJitterOptions {
 	multiplier: number;
 }
 /**
- * Exponential backoff with jitter. Port from "[Deno - Standard Library - Async - Retry](https://deno.land/std@0.196.0/async/retry.ts?s=_exponentialBackoffWithJitter)".
+ * Exponential backoff with jitter. Port from "[Deno - Standard Library - Async - Retry](https://deno.land/std/async/retry.ts?s=_exponentialBackoffWithJitter)".
  * @param {ExponentialBackoffWithJitterOptions} options
  * @returns {number}
  */
