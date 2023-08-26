@@ -69,16 +69,16 @@ import exFetch from "<URL>";// Default Import (Function `exFetch`)
 ### Example
 
 - ```ts
-  let responses: Response[] = await exFetchPaginate("https://api.github.com/repos/microsoft/vscode/labels?per_page=100");
+  const responses: Response[] = await exFetchPaginate("https://api.github.com/repos/microsoft/vscode/labels?per_page=100");
   
   responses.map((response: Response) => {
     return response.ok;
   }).includes(false);
   //=> false (`false` when no broken page, otherwise `true`)
   
-  let result = [];
-  for (let response in responses) {
-    result = await response.json();
+  const result = [];
+  for (const response in responses) {
+    result.push(...(await response.json()));
   }
   result;
   /*=>
