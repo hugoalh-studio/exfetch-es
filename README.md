@@ -19,7 +19,8 @@ This project is inspired from:
 
 ## 🌟 Feature
 
-- Automatically retry with the response header `Retry-After` or the jitter based delay.
+- Cache requests to reduce network usage and response time.
+- Retry on failure requests, obey the response header `Retry-After` or a fallback random-able interval.
 - Simplify paginate requests.
 
 ## 📓 Documentation (Excerpt)
