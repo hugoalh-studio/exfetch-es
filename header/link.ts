@@ -42,7 +42,7 @@ export class HTTPHeaderLink {
 		} else if (value instanceof Response) {
 			this.#parse(value.headers.get("Link") ?? "");
 		} else if (typeof value !== "undefined") {
-			throw new TypeError(`Argument \`value\` must be instance of Headers, HTTPHeaderLink, or Response, or type of string or undefined!`);
+			throw new TypeError(`Argument \`value\` is not an Array, Headers, HTTPHeaderLink, Response, string, or undefined!`);
 		}
 	}
 	/**
@@ -51,7 +51,7 @@ export class HTTPHeaderLink {
 	 */
 	#parse(value: string): void {
 		if (typeof value !== "string") {
-			throw new TypeError(`Argument \`value\` must be type of string!`);
+			throw new TypeError(`Argument \`value\` is not a string!`);
 		}
 		const valueResolve: string = value.replace(/[\uFEFF\u00A0]/gu, "");// Remove unicode characters of BOM (Byte Order Mark) and no-break space.
 		for (let cursor = 0; cursor < valueResolve.length; cursor += 1) {
@@ -189,7 +189,7 @@ export class HTTPHeaderLink {
 		} else if (value instanceof Response) {
 			this.#parse(value.headers.get("Link") ?? "");
 		} else {
-			throw new TypeError(`Argument \`value\` must be instance of Headers, HTTPHeaderLink, or Response, or type of string!`);
+			throw new TypeError(`Argument \`value\` is not an Array, Headers, HTTPHeaderLink, Response, or string!`);
 		}
 		return this;
 	}
@@ -256,7 +256,7 @@ export class HTTPHeaderLink {
 	 */
 	static parse(value: string | Headers | HTTPHeaderLink | Response): HTTPHeaderLink {
 		if (typeof value === "undefined") {
-			throw new TypeError(`Argument \`value\` must be instance of Headers, HTTPHeaderLink, or Response, or type of string!`);
+			throw new TypeError(`Argument \`value\` is not an Array, Headers, HTTPHeaderLink, Response, or string!`);
 		}
 		return new this(value);
 	}
@@ -267,7 +267,7 @@ export class HTTPHeaderLink {
 	 */
 	static stringify(value: HTTPHeaderLinkEntry[]): string {
 		if (!Array.isArray(value)) {
-			throw new TypeError(`Argument \`value\` must be instance of HTTPHeaderLinkEntry[]!`);
+			throw new TypeError(`Argument \`value\` is not an Array!`);
 		}
 		return new this(value).toString();
 	}
