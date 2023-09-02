@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.200.0/assert/assert_equals.ts";
+import { assertEquals } from "https://deno.land/std@0.201.0/assert/assert_equals.ts";
 import { Brotli, Deflate, Gzip, LZ4, Zlib } from "./mod.ts";
 const sampleContext = `Et laoreet et amet invidunt aliquyam dolores duo nibh gubergren labore minim voluptua et feugiat labore. Erat sed et lorem stet ipsum et sit stet. Duo diam takimata. Clita diam dolor commodo ea placerat clita option ipsum sanctus takimata quis. Erat ea sit et adipiscing qui accusam sanctus diam accusam diam est tempor et sadipscing takimata takimata et. Et ullamcorper et at. Amet gubergren elitr veniam lorem aliquam gubergren sadipscing in ea.
 
