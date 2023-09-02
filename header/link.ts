@@ -1,4 +1,8 @@
-const parametersNeedLowerCaseValue: Set<string> = new Set<string>(["rel", "type"]);
+import { isStringLowerCase } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.1.9/string.ts";
+const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
+	"rel",
+	"type"
+]);
 /**
  * Check URI.
  * @access private
@@ -7,7 +11,7 @@ const parametersNeedLowerCaseValue: Set<string> = new Set<string>(["rel", "type"
  */
 function checkURI(uri: string): void {
 	if (/\r?\n|\s|\t/u.test(uri)) {
-		throw new SyntaxError(`Whitespace characters must not exist in URI!`);
+		throw new SyntaxError(`Whitespace characters are not allow in URI!`);
 	}
 }
 /**
@@ -21,7 +25,13 @@ function cursorWhitespaceSkipper(value: string, cursor: number): number {
 	const valueAfterCursor: string = value.slice(cursor);
 	return (valueAfterCursor.length - valueAfterCursor.trimStart().length);
 }
-export type HTTPHeaderLinkEntry = [uri: string, parameters: Record<string, string>];
+/**
+ * HTTP header `Link` entry.
+ */
+export type HTTPHeaderLinkEntry = [
+	uri: string,
+	parameters: Record<string, string>
+];
 /**
  * Parse and stringify as HTTP header `Link` according to RFC 8288 standard.
  */
@@ -31,27 +41,19 @@ export class HTTPHeaderLink {
 	 * @param {string | Headers | HTTPHeaderLink | HTTPHeaderLinkEntry[] | Response} [value]
 	 */
 	constructor(value?: string | Headers | HTTPHeaderLink | HTTPHeaderLinkEntry[] | Response) {
-		if (typeof value === "string") {
-			this.#parse(value);
-		} else if (value instanceof Headers) {
-			this.#parse(value.get("Link") ?? "");
-		} else if (value instanceof HTTPHeaderLink) {
-			this.#entries = [...value.#entries];
-		} else if (Array.isArray(value)) {
+		if (typeof value !== "undefined") {
 			this.add(value);
-		} else if (value instanceof Response) {
-			this.#parse(value.headers.get("Link") ?? "");
-		} else if (typeof value !== "undefined") {
-			throw new TypeError(`Argument \`value\` is not an Array, Headers, HTTPHeaderLink, Response, string, or undefined!`);
 		}
 	}
 	/**
+	 * Parse HTTP header `Link` from string.
+	 * @access private
 	 * @param {string} value
 	 * @returns {void}
 	 */
 	#parse(value: string): void {
-		if (typeof value !== "string") {
-			throw new TypeError(`Argument \`value\` is not a string!`);
+		if (value.length === 0) {
+			return;
 		}
 		const valueResolve: string = value.replace(/[\uFEFF\u00A0]/gu, "");// Remove unicode characters of BOM (Byte Order Mark) and no-break space.
 		for (let cursor = 0; cursor < valueResolve.length; cursor += 1) {
@@ -133,7 +135,7 @@ export class HTTPHeaderLink {
 						cursor += cursorDiffParameterValue;
 					}
 				}
-				parameters[parameterName] = parameterValue;
+				parameters[parameterName] = httpHeaderLinkParametersNeedLowerCase.has(parameterName) ? parameterValue.toLowerCase() : parameterValue;
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
 				if (
 					cursor === valueResolve.length ||
@@ -145,12 +147,7 @@ export class HTTPHeaderLink {
 					cursor += 1;
 					continue;
 				}
-				throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character "," or ";", or end of the string!`);
-			}
-			for (const [name, value] of Object.entries(parameters)) {
-				if (parametersNeedLowerCaseValue.has(name)) {
-					parameters[name] = value.toLowerCase();
-				}
+				throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect character ",", character ";", or end of the string!`);
 			}
 			this.#entries.push([uri, parameters]);
 		}
@@ -161,35 +158,31 @@ export class HTTPHeaderLink {
 	 * @returns {this}
 	 */
 	add(value: string | Headers | HTTPHeaderLink | HTTPHeaderLinkEntry[] | Response): this {
-		if (typeof value === "string") {
-			this.#parse(value);
-		} else if (value instanceof Headers) {
+		if (value instanceof Headers) {
 			this.#parse(value.get("Link") ?? "");
 		} else if (value instanceof HTTPHeaderLink) {
 			this.#entries.push(...value.#entries);
 		} else if (Array.isArray(value)) {
 			for (const entry of value) {
-				if (entry.length !== 2) {
-					throw new SyntaxError(`Invalid entry columns!`);
-				}
 				const [uri, parameters] = entry;
 				checkURI(uri);
-				const parametersResolve: HTTPHeaderLinkEntry[1] = {};
-				for (const [name, value] of Object.entries(parameters)) {
-					const nameLowerCase: string = name.toLowerCase();
-					if (!(/^[\w-]+?\*?$/u.test(nameLowerCase))) {
-						throw new SyntaxError(`\`${nameLowerCase}\` is not a valid parameter name!`);
+				Object.entries(parameters).forEach(([parameterName, parameterValue]: [string, string]) => {
+					if (
+						!isStringLowerCase(parameterName) ||
+						!(/^[\w-]+\*?$/u.test(parameterName))
+					) {
+						throw new SyntaxError(`\`${parameterName}\` is not a valid parameter name!`);
 					}
-					if (parametersNeedLowerCaseValue.has(nameLowerCase)) {
-						parametersResolve[nameLowerCase] = value.toLowerCase();
+					if (httpHeaderLinkParametersNeedLowerCase.has(parameterName) && !isStringLowerCase(parameterValue)) {
+						throw new SyntaxError(`\`${parameterValue}\` is not a valid parameter name!`);
 					}
-				}
-				this.#entries.push([uri, parametersResolve]);
+				});
+				this.#entries.push([uri, { ...parameters }]);
 			}
 		} else if (value instanceof Response) {
 			this.#parse(value.headers.get("Link") ?? "");
 		} else {
-			throw new TypeError(`Argument \`value\` is not an Array, Headers, HTTPHeaderLink, Response, or string!`);
+			this.#parse(value);
 		}
 		return this;
 	}
@@ -198,7 +191,7 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	entries(): HTTPHeaderLinkEntry[] {
-		return [...this.#entries];
+		return this.#entries;
 	}
 	/**
 	 * Get entries by parameter.
@@ -207,12 +200,14 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	getByParameter(name: string, value: string): HTTPHeaderLinkEntry[] {
-		const nameLowerCase: string = name.toLowerCase();
-		if (nameLowerCase === "rel") {
+		if (!isStringLowerCase(name)) {
+			throw new SyntaxError(`\`${name}\` is not a valid parameter name!`);
+		}
+		if (name === "rel") {
 			return this.getByRel(value);
 		}
 		return this.#entries.filter((entry: HTTPHeaderLinkEntry): boolean => {
-			return (entry[1][nameLowerCase] === value);
+			return (entry[1][name] === value);
 		});
 	}
 	/**
@@ -221,13 +216,15 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	getByRel(value: string): HTTPHeaderLinkEntry[] {
-		const valueLowerCase: string = value.toLowerCase();
+		if (!isStringLowerCase(value)) {
+			throw new SyntaxError(`\`${value}\` is not a valid parameter \`rel\` value!`);
+		}
 		return this.#entries.filter((entity: HTTPHeaderLinkEntry): boolean => {
-			return (entity[1].rel?.toLowerCase() === valueLowerCase);
+			return (entity[1].rel?.toLowerCase() === value);
 		});
 	}
 	/**
-	 * Whether have entries by parameter.
+	 * Whether have entries that match parameter.
 	 * @param {string} name Name of the parameter.
 	 * @param {string} value Value of the parameter.
 	 * @returns {boolean} Result.
@@ -244,7 +241,7 @@ export class HTTPHeaderLink {
 			const [uri, parameters] = entry;
 			let result = `<${encodeURI(uri)}>`;
 			for (const [name, value] of Object.entries(parameters)) {
-				result += `; ${name}="${value.replace(/"/g, "\\\"")}"`;
+				result += (value.length > 0) ? `; ${name}="${value.replace(/"/g, "\\\"")}"` : `; ${name}`;
 			}
 			return result;
 		}).join(", ");
@@ -255,9 +252,6 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLink}
 	 */
 	static parse(value: string | Headers | HTTPHeaderLink | Response): HTTPHeaderLink {
-		if (typeof value === "undefined") {
-			throw new TypeError(`Argument \`value\` is not an Array, Headers, HTTPHeaderLink, Response, or string!`);
-		}
 		return new this(value);
 	}
 	/**
@@ -266,9 +260,6 @@ export class HTTPHeaderLink {
 	 * @returns {string}
 	 */
 	static stringify(value: HTTPHeaderLinkEntry[]): string {
-		if (!Array.isArray(value)) {
-			throw new TypeError(`Argument \`value\` is not an Array!`);
-		}
 		return new this(value).toString();
 	}
 }
