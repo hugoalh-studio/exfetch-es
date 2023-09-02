@@ -3,6 +3,9 @@
  */
 export class HTTPHeaderRetryAfter {
 	#timestamp: Date;
+	/**
+	 * @param {number | string | Date | Headers | HTTPHeaderRetryAfter | Response} value
+	 */
 	constructor(value: number | string | Date | Headers | HTTPHeaderRetryAfter | Response) {
 		if (typeof value === "number") {
 			if (!(value >= 0)) {
@@ -35,14 +38,27 @@ export class HTTPHeaderRetryAfter {
 			}
 		}
 	}
-	getRemainMilliseconds(): number {
+	/**
+	 * Get `Date`.
+	 * @returns {Date}
+	 */
+	getDate(): Date {
+		return this.#timestamp;
+	}
+	/**
+	 * Get remain time in milliseconds.
+	 * @returns {number} Remain time in milliseconds.
+	 */
+	getRemainTimeMilliseconds(): number {
 		const remainMilliseconds: number = this.#timestamp.valueOf() - Date.now();
 		return ((remainMilliseconds >= 0) ? remainMilliseconds : 0);
 	}
-	getRemainSeconds(): number {
-		return this.getRemainMilliseconds() / 1000;
-	}
-	toDate(): Date {
-		return this.#timestamp;
+	/**
+	 * Get remain time in seconds.
+	 * @returns {number} Remain time in seconds.
+	 */
+	getRemainTimeSeconds(): number {
+		return (this.getRemainTimeMilliseconds() / 1000);
 	}
 }
+export default HTTPHeaderRetryAfter;

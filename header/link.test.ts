@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/assert_equals.ts";
 import { assertThrows } from "https://deno.land/std@0.201.0/assert/assert_throws.ts";
-import HTTPHeaderLink from "./link.ts";
+import { HTTPHeaderLink } from "./link.ts";
 Deno.test("From String Success 1", () => {
 	const instance = new HTTPHeaderLink(`<https://example.com>; rel="preconnect"`);
 	assertEquals(instance.hasParameter("rel", "preconnect"), true);
@@ -31,17 +31,13 @@ Deno.test("From String Success 4", () => {
 	assertEquals(instance.hasParameter("rel", "postconnect"), false);
 	assertEquals(instance.entries().length, 0);
 });
-Deno.test("From String Success 5", () => {
-	const instance = new HTTPHeaderLink([
-		["https://one.example.com", {
-			rel: "preconnect"
-		}]
-	]);
+Deno.test("From Entries Success 1", () => {
+	const instance = new HTTPHeaderLink([["https://one.example.com", { rel: "preconnect" }]]);
 	assertEquals(instance.hasParameter("rel", "preconnect"), true);
 	assertEquals(instance.entries().length, 1);
 	assertEquals(instance.toString(), `<https://one.example.com>; rel="preconnect"`);
 });
-Deno.test("From String Bad 1", () => {
+Deno.test("From String Throw 1", () => {
 	assertThrows(() => {
 		new HTTPHeaderLink(`https://bad.example; rel="preconnect"`);
 	});
