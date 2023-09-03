@@ -304,7 +304,7 @@ export class ExFetch {
 		},
 		throwOnInvalidHeaderLink: true
 	};
-	#retry = {
+	#retry: ExFetchRetryStatus = {
 		attempts: 4,
 		interval: {
 			increment: true,

@@ -20,7 +20,7 @@ This project is inspired from:
 
 ## 🌟 Feature
 
-- Cache requests to reduce network usage and response time.
+- Cache suitable `Request`-`Response`s to reduce network usage and response time.
 - Retry on failure requests, obey the response header `Retry-After` or a fallback random-able interval.
 - Simplify paginate requests.
 
@@ -63,7 +63,9 @@ import exFetch from "<URL>";// Default Import (Function `exFetch`)
 #### Interface / Type
 
 - `ExFetchEventName`
-- `ExFetchEventOnRetryPayload`
+- `ExFetchEventOnRetryParameters`
+- `ExFetchEventOptions`
+- `ExFetchIntervalOptions`
 - `ExFetchOptions`
 - `ExFetchPaginateOptions`
 - `ExFetchRetryOptions`
