@@ -2,6 +2,7 @@ import { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
 import { randomInt } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { HTTPHeaderLink } from "./header/link.ts";
+import { HTTPHeaderRetryAfter } from "./header/retry_after.ts";
 /**
  * exFetch HTTP status codes that retryable.
  */
@@ -313,7 +314,7 @@ export class ExFetch {
 		}
 	};
 	#timeout = Infinity;
-	#userAgent = userAgentDefault;
+	#userAgent: string = userAgentDefault;
 	/**
 	 * Create a new extend `fetch` instance.
 	 * @param {ExFetchOptions} [options={}] Options.
@@ -372,48 +373,22 @@ export class ExFetch {
 	}
 	/**
 	 * Add HTTP status codes that retryable.
-	 * @param {number} value Value.
-	 * @returns {this}
-	 */
-	addHTTPStatusCodesRetryable(value: number): this;
-	/**
-	 * Add HTTP status codes that retryable.
-	 * @param {number[]} values Values.
-	 * @returns {this}
-	 */
-	addHTTPStatusCodesRetryable(values: number[]): this;
-	/**
-	 * Add HTTP status codes that retryable.
 	 * @param {...number} values Values.
 	 * @returns {this}
 	 */
-	addHTTPStatusCodesRetryable(...values: number[]): this;
-	addHTTPStatusCodesRetryable(...values: number[] | number[][]): this {
-		for (const value of values.flat(Infinity) as number[]) {
+	addHTTPStatusCodesRetryable(...values: number[]): this {
+		for (const value of values) {
 			this.#httpStatusCodesRetryable.add(value);
 		}
 		return this;
 	}
 	/**
 	 * Delete HTTP status codes that not retryable.
-	 * @param {number} value Value.
-	 * @returns {this}
-	 */
-	deleteHTTPStatusCodesRetryable(value: number): this;
-	/**
-	 * Delete HTTP status codes that not retryable.
-	 * @param {number[]} values Values.
-	 * @returns {this}
-	 */
-	deleteHTTPStatusCodesRetryable(values: number[]): this;
-	/**
-	 * Delete HTTP status codes that not retryable.
 	 * @param {...number} values Values.
 	 * @returns {this}
 	 */
-	deleteHTTPStatusCodesRetryable(...values: number[]): this;
-	deleteHTTPStatusCodesRetryable(...values: number[] | number[][]): this {
-		for (const value of values.flat(Infinity) as number[]) {
+	deleteHTTPStatusCodesRetryable(...values: number[]): this {
+		for (const value of values) {
 			this.#httpStatusCodesRetryable.delete(value);
 		}
 		return this;
@@ -425,59 +400,127 @@ export class ExFetch {
 	 * @returns {Promise<Response>} Response.
 	 */
 	async fetch(input: Exclude<Parameters<typeof fetch>[0], Request>, init?: Parameters<typeof fetch>[1]): Promise<Response> {
-		let initResolve: ExFetchDefaultInit = this.#mergeDefaultInit(init);
-		let attempt = 0;
+		const cacheConditionCommon: boolean = (
+			typeof init === "undefined" ||
+			typeof init.method === "undefined" ||
+			init.method.toUpperCase() === "GET"
+		);
+		const cacheCondition = {
+			restore: cacheConditionCommon,
+			useFirst: false,
+			save: cacheConditionCommon
+		};
+		switch (init?.cache) {
+			case "force-cache":
+				cacheCondition.useFirst = true;
+				break;
+			case "no-store":
+				cacheCondition.restore = false;
+				cacheCondition.save = false;
+				break;
+			case "reload":
+				cacheCondition.restore = false;
+				break;
+			default:
+				break;
+		}
+		// Manually increase fuzziness to match a cache easier, but still not cache if cache conditions are not meet.
+		const requestForCache: Request = new Request(input, {
+			...init,
+			cache: undefined,
+			credentials: undefined,
+			keepalive: undefined,
+			method: init?.method?.toUpperCase(),
+			mode: undefined,
+			redirect: undefined,
+			signal: undefined,
+			window: undefined
+		});
+		let responseCached: Response | undefined = undefined;
+		if (cacheCondition.restore) {
+			await this.#cacheLoad();
+			responseCached = await this.#cacheNode?.match(requestForCache);
+		}
+		if (cacheCondition.useFirst && responseCached instanceof Response) {
+			return responseCached;
+		}
+		const responseCachedETag: string | undefined = responseCached?.headers.get("ETag") ?? undefined;
+		const responseCachedLastModified: string | undefined = responseCached?.headers.get("Last-Modified") ?? undefined;
+		const requestForFetchHeaders: Headers = new Headers(init?.headers);
+		const requestForFetchHeadersUseCachedETag: boolean = !requestForFetchHeaders.has("If-Match") && !requestForFetchHeaders.has("If-None-Match") && !requestForFetchHeaders.has("If-Range") && typeof responseCachedETag !== "undefined";
+		const requestForFetchHeadersUseCachedLastModified: boolean = !requestForFetchHeaders.has("If-Modified-Since") && !requestForFetchHeaders.has("If-Unmodified-Since") && !requestForFetchHeaders.has("If-Range") && typeof responseCachedLastModified !== "undefined";
+		const responseCachedIsValid: boolean = (
+			requestForFetchHeadersUseCachedETag ||
+			requestForFetchHeadersUseCachedLastModified
+		);
+		if (requestForFetchHeadersUseCachedETag) {
+			requestForFetchHeaders.set("If-None-Match", responseCachedETag as string);
+		}
+		if (requestForFetchHeadersUseCachedLastModified) {
+			requestForFetchHeaders.set("If-Modified-Since", responseCachedLastModified as string);
+		}
+		if (!requestForFetchHeaders.has("User-Agent") && this.#userAgent.length > 0) {
+			requestForFetchHeaders.set("User-Agent", this.#userAgent);
+		}
+		let requestForFetchSignal: AbortSignal | undefined = init?.signal ?? undefined;
+		if (typeof requestForFetchSignal === "undefined" && this.#timeout !== Infinity) {
+			requestForFetchSignal = AbortSignal.timeout(this.#timeout);
+		}
+		const requestForFetch: Request = new Request(input, {
+			...init,
+			headers: requestForFetchHeaders,
+			signal: requestForFetchSignal
+		});
+		let attempt = 1;
 		let response: Response;
 		do {
-			response = await fetch(input, initResolve);
+			response = await fetch(requestForFetch);
+			if (responseCached instanceof Response && responseCachedIsValid && (
+				response.status === 304 ||
+				response.statusText === "Not Modified"
+			)) {
+				return responseCached;
+			}
 			if (
 				response.ok ||
-				attempt >= this.#retry.attempts
+				attempt >= this.#retry.attempts ||
+				!this.#httpStatusCodesRetryable.has(response.status)
 			) {
 				break;
 			}
-			let retryable: boolean = statusCodeRetryable.has(response.status);
-			if (typeof this.#retry.condition === "function") {
-				if (!this.#retry.condition(response.status, retryable)) {
-					break;
-				}
-			} else {
-				if (!retryable) {
-					break;
-				}
+			let intervalTime: number | undefined = undefined;
+			try {
+				intervalTime = new HTTPHeaderRetryAfter(response).getRemainTimeMilliseconds();
+			} catch {
+				// Continue on error.
 			}
-			let delayTime: number;
-			let headerRetryAfterValue: string | null = response.headers.get("Retry-After");
-			if (typeof headerRetryAfterValue === "string") {
-				if (/^[A-Z][a-z][a-z], \d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d GMT$/u.test(headerRetryAfterValue)) {
-					try {
-						delayTime ??= Date.parse(headerRetryAfterValue) - Date.now();
-					} catch { }
-				} else {
-					try {
-						delayTime ??= Number(headerRetryAfterValue) * 1000;
-					} catch { }
-				}
-			}
-			delayTime ??= exponentialBackoffWithJitter({
-				attempt: this.#retry.attempts,
-				base: this.#retry.delayMinimum,
-				cap: this.#retry.delayMaximum,
-				jitter: this.#retry.jitter,
-				multiplier: this.#retry.backoffMultiplier
+			intervalTime ??= resolveIntervalTime({
+				...this.#retry.interval,
+				attemptCurrent: attempt,
+				attempts: this.#retry.attempts
 			});
-			delayTime = Math.max(1000, delayTime);
-			let eventRetryPayload: ExFetchEventOnRetryPayload = {
-				attemptCurrent: attempt + 1,
+			const eventRetryPayload: ExFetchEventOnRetryParameters = {
+				attemptCurrent: attempt,
 				attempts: this.#retry.attempts,
-				retryAfter: delayTime,
+				retryAfter: intervalTime,
 				statusCode: response.status,
 				statusText: response.statusText
 			};
-			this.#event?.emit("retry", eventRetryPayload);
-			await delay(delayTime, { signal: initResolve.signal });
+			this.#event.emit("retry", eventRetryPayload);
+			await delay(intervalTime, { signal: requestForFetchSignal });
 			attempt += 1;
 		} while (attempt <= this.#retry.attempts);
+		if (cacheCondition.save && response.ok && response.status >= 200 && response.status < 300 && (
+			response.headers.has("ETag") ||
+			response.headers.has("Last-Modified")
+		)) {
+			await this.#cacheLoad();
+			try {
+				await this.#cacheNode?.put(requestForCache, response);
+			} catch {
+				// Continue on error.
+			}
+		}
 		return response;
 	}
 	/**
@@ -488,28 +531,33 @@ export class ExFetch {
 	 * @returns {Promise<Response[]>} Responses.
 	 */
 	async fetchPaginate(input: Exclude<Parameters<typeof fetch>[0], Request>, init?: Parameters<typeof fetch>[1], optionsOverride: ExFetchPaginateOptions = {}): Promise<Response[]> {
-		checkPaginateOptions(optionsOverride, "optionsOverride");
-		let initResolve: ExFetchDefaultInit = this.#mergeDefaultInit(init);
-		let optionsResolve: ExFetchPaginateOptionsBase = { ...this.#paginate, ...optionsOverride };
-		let responses: Response[] = [];
-		for (let page = 1, uri: URL | undefined = new URL(input); page <= optionsResolve.count && uri instanceof URL; page += 1) {
-			if (page > 1 && optionsResolve.pause > 0) {
-				await delay(optionsResolve.pause, { signal: initResolve.signal });
+		const options: ExFetchPaginateStatus = resolvePaginateOptions(optionsOverride, "optionsOverride", this.#paginate);
+		const responses: Response[] = [];
+		for (let page = 1, uri: URL | undefined = new URL(input); page <= options.amount && uri instanceof URL; page += 1) {
+			if (page > 1) {
+				const intervalTime: number = resolveIntervalTime({
+					...options.interval,
+					attemptCurrent: 1,
+					attempts: Number.MAX_SAFE_INTEGER
+				});
+				if (intervalTime > 0) {
+					await delay(intervalTime, { signal: init?.signal ?? undefined });
+				}
 			}
-			let uriLookUp: URL = uri;
+			const uriLookUp: URL = uri;
 			uri = undefined;
-			let response: Response = await this.fetch(uriLookUp, initResolve);
+			const response: Response = await this.fetch(uriLookUp, init);
 			responses.push(response);
 			if (response.ok) {
 				try {
-					let responseHeaderLink: HTTPHeaderLink = HTTPHeaderLink.parse(response);
-					if (typeof optionsResolve.linkUpNextPage === "function") {
-						uri = optionsResolve.linkUpNextPage(uriLookUp, responseHeaderLink);
+					const responseHeaderLink: HTTPHeaderLink = HTTPHeaderLink.parse(response);
+					if (typeof options.linkUpNextPage === "function") {
+						uri = options.linkUpNextPage(uriLookUp, responseHeaderLink);
 					} else {
 						uri = new URL(responseHeaderLink.getByRel("next")[0][0], uriLookUp);
 					}
 				} catch (error) {
-					if (optionsResolve.throwOnInvalidHeaderLink) {
+					if (options.throwOnInvalidHeaderLink) {
 						throw new SyntaxError(`[${uriLookUp.toString()}] ${error?.message ?? error}`);
 					}
 				}
