@@ -7,4 +7,5 @@ Deno.test("https://jsonplaceholder.typicode.com/posts", {
 }, async () => {
 	const response = await new ExFetch().fetch("https://jsonplaceholder.typicode.com/posts");
 	assert(response.ok === true && response.status === 200);
+	await response.body?.cancel();
 });
