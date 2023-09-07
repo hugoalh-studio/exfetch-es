@@ -24,43 +24,51 @@ This project is inspired from:
 - Retry on failure requests, obey the response header `Retry-After` or a fallback random-able interval.
 - Simplify paginate requests.
 
-## 📓 Documentation (Excerpt)
+## 📥 Import
 
-For the full documentation, please visit the [GitHub Repository Wiki](https://github.com/hugoalh-studio/exfetch-deno/wiki).
+### Deno
 
-### Getting Started
-
-- Deno >= v1.35.0
+- **Target Version:** >= v1.35.0
+- **Require Permission:**
   - **`allow-net` (Allow Network Addresses):** *Resources Domain*
+- **Domain/Registry:**
+  - **[Deno Land](https://deno.land/x/exfetch):**
+    ```
+    https://deno.land/x/exfetch[@<Tag>]/mod.ts
+    ```
+  - **DenoPKG:**
+    ```
+    https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts
+    ```
+  - **GitHub Raw *\[Require Tag\]*:**
+    ```
+    https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts
+    ```
+  - **Pax:**
+    ```
+    https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts
+    ```
 
-```ts
-/* Either */
-import { ... } from "<URL>";// Named Import
-import * as exFetch from "<URL>";// Namespace Import
-import exFetch from "<URL>";// Default Import (Function `exFetch`)
-```
+> **ℹ️ Notice:** Although it is recommended to import module with main path `mod.ts` in general, it is also able to import part of the module with sub path (if available), but do not import if:
+>
+> - it's file path has an underscore prefix (e.g.: `_foo.ts`, `_util/bar.ts`), or
+> - it is a benchmark or test file (e.g.: `foo.bench.ts`, `foo.test.ts`), or
+> - it's symbol has an underscore prefix (e.g.: `export function _baz() {}`).
+>
+> These elements are not considered part of the public API, thus no stability is guaranteed for them.
 
-| **Domain / Registry** | **URL** |
-|:-:|:--|
-| [Deno Land](https://deno.land/x/exfetch) | `https://deno.land/x/exfetch[@<Tag>]/mod.ts` |
-| DenoPKG | `https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts` |
-| GitHub Raw **\*** | `https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts` |
-| Pax | `https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts` |
+## 🧩 API (Excerpt)
 
-**\*:** Must provide a tag.
-
-### API
-
-#### Class
+### Class
 
 - `ExFetch`
 
-#### Function
+### Function
 
 - `exFetch`
 - `exFetchPaginate`
 
-#### Interface / Type
+### Interface / Type
 
 - `ExFetchEventName`
 - `ExFetchEventOnRetryParameters`
@@ -70,9 +78,15 @@ import exFetch from "<URL>";// Default Import (Function `exFetch`)
 - `ExFetchPaginateOptions`
 - `ExFetchRetryOptions`
 
-### Example
+> **ℹ️ Notice:** Documentation is included inside the script file, can view it via:
+>
+> - [Deno CLI `deno doc`](https://deno.land/manual/tools/documentation_generator)
+> - [Deno Doc Land](https://doc.deno.land)
+
+## ✍️ Example
 
 - ```ts
+  import { exFetchPaginate } from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/main/exfetch.ts";
   const responses: Response[] = await exFetchPaginate("https://api.github.com/repos/microsoft/vscode/labels?per_page=100");
   
   responses.map((response: Response) => {
