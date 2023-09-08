@@ -49,7 +49,7 @@ This project is inspired from:
     https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts
     ```
 
-> **ℹ️ Notice:** Although it is recommended to import module with main path `mod.ts` in general, it is also able to import part of the module with sub path (if available), but do not import if:
+> **ℹ️ Notice:** Although it is recommended to import main module with path `mod.ts` in general, it is also able to import part of the module with sub path if available, but do not import if:
 >
 > - it's file path has an underscore prefix (e.g.: `_foo.ts`, `_util/bar.ts`), or
 > - it is a benchmark or test file (e.g.: `foo.bench.ts`, `foo.test.ts`), or
