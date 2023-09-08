@@ -1,4 +1,4 @@
-import { isStringLowerCase } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.1.9/string.ts";
+import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.2.0/string/is_case_lower.ts";
 const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
 	"rel",
 	"type"
@@ -168,12 +168,12 @@ export class HTTPHeaderLink {
 				checkURI(uri);
 				Object.entries(parameters).forEach(([parameterName, parameterValue]: [string, string]) => {
 					if (
-						!isStringLowerCase(parameterName) ||
+						!isStringCaseLower(parameterName) ||
 						!(/^[\w-]+\*?$/u.test(parameterName))
 					) {
 						throw new SyntaxError(`\`${parameterName}\` is not a valid parameter name!`);
 					}
-					if (httpHeaderLinkParametersNeedLowerCase.has(parameterName) && !isStringLowerCase(parameterValue)) {
+					if (httpHeaderLinkParametersNeedLowerCase.has(parameterName) && !isStringCaseLower(parameterValue)) {
 						throw new SyntaxError(`\`${parameterValue}\` is not a valid parameter name!`);
 					}
 				});
@@ -200,7 +200,7 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	getByParameter(name: string, value: string): HTTPHeaderLinkEntry[] {
-		if (!isStringLowerCase(name)) {
+		if (!isStringCaseLower(name)) {
 			throw new SyntaxError(`\`${name}\` is not a valid parameter name!`);
 		}
 		if (name === "rel") {
@@ -216,7 +216,7 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	getByRel(value: string): HTTPHeaderLinkEntry[] {
-		if (!isStringLowerCase(value)) {
+		if (!isStringCaseLower(value)) {
 			throw new SyntaxError(`\`${value}\` is not a valid parameter \`rel\` value!`);
 		}
 		return this.#entries.filter((entity: HTTPHeaderLinkEntry): boolean => {
