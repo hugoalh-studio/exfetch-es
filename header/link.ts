@@ -1,4 +1,4 @@
-import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.2.0/string/is_case_lower.ts";
+import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.3.0/string/is_case_lower.ts";
 const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
 	"rel",
 	"type"
