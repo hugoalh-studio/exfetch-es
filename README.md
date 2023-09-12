@@ -24,29 +24,30 @@ This project is inspired from:
 - Retry on failure requests, obey the response header `Retry-After` or a fallback random-able interval.
 - Simplify paginate requests.
 
-## 📥 Import
+## 🔰 Begin
 
 ### Deno
 
 - **Target Version:** >= v1.35.0
 - **Require Permission:**
-  - **`allow-net` (Allow Network Addresses):** *Resources Domain*
+  - **`allow-net` (Allow Network Addresses):**
+    - *Resources Domain*
 - **Domain/Registry:**
-  - **[Deno Land](https://deno.land/x/exfetch):**
+  - [Deno Land](https://deno.land/x/exfetch)
+    ```ts
+    import ... from "https://deno.land/x/exfetch[@<Tag>]/mod.ts";
     ```
-    https://deno.land/x/exfetch[@<Tag>]/mod.ts
+  - DenoPKG
+    ```ts
+    import ... from "https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts";
     ```
-  - **DenoPKG:**
+  - GitHub Raw *\[Require Tag\]*
+    ```ts
+    import ... from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts";
     ```
-    https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts
-    ```
-  - **GitHub Raw *\[Require Tag\]*:**
-    ```
-    https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts
-    ```
-  - **Pax:**
-    ```
-    https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts
+  - Pax
+    ```ts
+    import ... from "https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts";
     ```
 
 > **ℹ️ Notice:** Although it is recommended to import main module with path `mod.ts` in general, it is also able to import part of the module with sub path if available, but do not import if:
