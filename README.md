@@ -89,12 +89,12 @@ This project is inspired from:
 - ```ts
   import { exFetchPaginate } from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/main/exfetch.ts";
   const responses: Response[] = await exFetchPaginate("https://api.github.com/repos/microsoft/vscode/labels?per_page=100");
-  
+
   responses.map((response: Response) => {
     return response.ok;
   }).includes(false);
   //=> false (`false` when no broken page, otherwise `true`)
-  
+
   const result = [];
   for (const response in responses) {
     result.push(...(await response.json()));
