@@ -1,4 +1,4 @@
-import { delay } from "https://deno.land/std@0.201.0/async/delay.ts";
+import { delay } from "https://deno.land/std@0.202.0/async/delay.ts";
 import { randomInt } from "node:crypto";
 import { EventEmitter } from "node:events";
 import { HTTPHeaderLink } from "./header/link.ts";
