@@ -1,4 +1,4 @@
-import { assert } from "https://deno.land/std@0.202.0/assert/assert.ts";
+import { assert } from "https://deno.land/std@0.203.0/assert/assert.ts";
 import { ExFetch } from "./exfetch.ts";
 Deno.test("https://jsonplaceholder.typicode.com/posts", {
 	permissions: {
