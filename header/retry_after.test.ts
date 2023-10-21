@@ -1,6 +1,6 @@
-import { assert } from "https://deno.land/std@0.203.0/assert/assert.ts";
-import { assertEquals } from "https://deno.land/std@0.203.0/assert/assert_equals.ts";
-import { assertThrows } from "https://deno.land/std@0.203.0/assert/assert_throws.ts";
+import { assert } from "https://deno.land/std@0.204.0/assert/assert.ts";
+import { assertEquals } from "https://deno.land/std@0.204.0/assert/assert_equals.ts";
+import { assertThrows } from "https://deno.land/std@0.204.0/assert/assert_throws.ts";
 import { HTTPHeaderRetryAfter } from "./retry_after.ts";
 Deno.test("From String Good 1", { permissions: "none" }, () => {
 	const instance = new HTTPHeaderRetryAfter("Wed, 21 Oct 2015 07:28:00 GMT");
