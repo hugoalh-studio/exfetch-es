@@ -1,7 +1,7 @@
 import { delay } from "https://deno.land/std@0.204.0/async/delay.ts";
 import { randomInt } from "node:crypto";
 import { EventEmitter } from "node:events";
-import { HTTPHeaderLink } from "./header/link.ts";
+import { HTTPHeaderLink, type HTTPHeaderLinkEntry } from "./header/link.ts";
 import { HTTPHeaderRetryAfter } from "./header/retry_after.ts";
 /**
  * exFetch HTTP status codes that retryable.
@@ -554,7 +554,10 @@ export class ExFetch {
 					if (typeof options.linkUpNextPage === "function") {
 						uri = options.linkUpNextPage(uriLookUp, responseHeaderLink);
 					} else {
-						uri = new URL(responseHeaderLink.getByRel("next")[0][0], uriLookUp);
+						const responseHeaderLinkNextPage: HTTPHeaderLinkEntry[] = responseHeaderLink.getByRel("next");
+						if (responseHeaderLinkNextPage.length > 0) {
+							uri = new URL(responseHeaderLinkNextPage[0][0], uriLookUp);
+						}
 					}
 				} catch (error) {
 					if (options.throwOnInvalidHeaderLink) {
