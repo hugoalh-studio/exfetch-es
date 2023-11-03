@@ -151,3 +151,7 @@ This project is inspired from:
   ]
   */
   ```
+
+## 🔗 Other Edition
+
+- [NodeJS](https://github.com/hugoalh-studio/exfetch-nodejs)
