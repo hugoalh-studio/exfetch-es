@@ -1,4 +1,5 @@
-import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.5.0/string/is_case_lower.ts";
+import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.6.0/string/is_case_lower.ts";
+import { isStringSingleLine } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.6.0/string/is_singleline.ts";
 const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
 	"rel",
 	"type"
@@ -10,8 +11,11 @@ const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
  * @returns {void}
  */
 function checkURI(uri: string): void {
-	if (/\r?\n|\s|\t/u.test(uri)) {
-		throw new SyntaxError(`Whitespace characters are not allow in URI!`);
+	if (
+		!isStringSingleLine(uri) ||
+		/[\s\t]/u.test(uri)
+	) {
+		throw new SyntaxError(`${uri} is not a valid URI!`);
 	}
 }
 /**
@@ -30,10 +34,10 @@ function cursorWhitespaceSkipper(value: string, cursor: number): number {
  */
 export type HTTPHeaderLinkEntry = [
 	uri: string,
-	parameters: Record<string, string>
+	parameters: { [name: string]: string; }
 ];
 /**
- * Parse and stringify as HTTP header `Link` according to RFC 8288 standard.
+ * Handle HTTP header `Link` according to RFC 8288 standard.
  */
 export class HTTPHeaderLink {
 	#entries: HTTPHeaderLinkEntry[] = [];

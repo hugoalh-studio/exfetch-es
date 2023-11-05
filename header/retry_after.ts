@@ -1,5 +1,5 @@
 /**
- * Parse HTTP header `Retry-After`.
+ * Handle HTTP header `Retry-After`.
  */
 export class HTTPHeaderRetryAfter {
 	#timestamp: Date;
