@@ -1,5 +1,5 @@
 /**
- * Handle HTTP header `Retry-After`.
+ * Handle HTTP header `Retry-After` according to RFC 9110 standard.
  */
 export class HTTPHeaderRetryAfter {
 	#timestamp: Date;
