@@ -34,7 +34,7 @@ This project is inspired from:
 
 - **Target Version:** >= v1.35.0
 - **Require Permission:**
-  - **`allow-net` (Allow Network Addresses):**
+  - **Network (`allow-net`):**
     - *Resources Domain*
 - **Domain/Registry:**
   - [Deno Land](https://deno.land/x/exfetch)
