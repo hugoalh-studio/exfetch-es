@@ -25,16 +25,12 @@ export class HTTPHeaderRetryAfter {
 			} else {
 				valueRaw = value;
 			}
-			if (valueRaw.length > 0) {
-				if (/^[A-Z][a-z][a-z], \d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d GMT$/u.test(valueRaw)) {
-					this.#timestamp = new Date(valueRaw);
-				} else if (/^\d+$/u.test(valueRaw)) {
-					this.#timestamp = new Date(Date.now() + Number(valueRaw) * 1000);
-				} else {
-					throw new SyntaxError(`\`${valueRaw}\` is not a valid HTTP header \`Retry-After\` syntax!`);
-				}
+			if (/^[A-Z][a-z][a-z], \d\d [A-Z][a-z][a-z] \d\d\d\d \d\d:\d\d:\d\d GMT$/u.test(valueRaw)) {
+				this.#timestamp = new Date(valueRaw);
+			} else if (/^\d+$/u.test(valueRaw)) {
+				this.#timestamp = new Date(Date.now() + Number(valueRaw) * 1000);
 			} else {
-				this.#timestamp = new Date();
+				throw new SyntaxError(`\`${valueRaw}\` is not a valid HTTP header \`Retry-After\` syntax!`);
 			}
 		}
 	}
