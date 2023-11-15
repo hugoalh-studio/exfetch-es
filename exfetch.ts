@@ -384,11 +384,11 @@ function setDelay(value: number, signal?: AbortSignal | undefined): Promise<void
 		function abort(): void {
 			clearTimeout(id);
 			reject(signal?.reason);
-		};
+		}
 		function done(): void {
 			signal?.removeEventListener("abort", abort);
 			resolve();
-		};
+		}
 		const id: number = setTimeout(done, value);
 		signal?.addEventListener("abort", abort, { once: true });
 	});
