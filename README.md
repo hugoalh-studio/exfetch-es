@@ -72,21 +72,13 @@ This project is inspired from:
 ### Class
 
 - `ExFetch`
+- `HTTPHeaderLink`
+- `HTTPHeaderRetryAfter`
 
 ### Function
 
 - `exFetch`
 - `exFetchPaginate`
-
-### Interface / Type
-
-- `ExFetchEventName`
-- `ExFetchEventOnRetryParameters`
-- `ExFetchEventOptions`
-- `ExFetchIntervalOptions`
-- `ExFetchOptions`
-- `ExFetchPaginateOptions`
-- `ExFetchRetryOptions`
 
 ## ✍️ Example
 
