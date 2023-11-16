@@ -24,9 +24,10 @@ This project is inspired from:
 
 ## 🌟 Feature
 
-- Cache suitable `Request`-`Response`s to reduce network usage and response time.
-- Retry on failure requests, obey the response header `Retry-After` or a fallback random-able interval.
-- Simplify paginate requests.
+- Ability to cache suitable `Request`-`Response`s to reduce network usage and response time.
+- Automatically retry on failure requests, preferentially obey the response header `Retry-After`.
+- Redirect fine control.
+- Simplify URL paginate requests.
 
 ## 🔰 Begin
 
