@@ -399,7 +399,7 @@ function setDelay(value: number, signal?: AbortSignal | undefined): Promise<void
 export class ExFetch {
 	#allowCache = false;
 	#cacheStorage?: Cache;
-	#cacheStorageDefer: Promise<Cache> | undefined = undefined;
+	#cacheStorageDefer?: Promise<Cache>;
 	#httpStatusCodesRetryable: Set<number>;
 	#paginate: ExFetchPaginateOptionsInternal = {
 		delay: {
