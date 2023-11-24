@@ -553,12 +553,12 @@ export class ExFetch {
 		if (new URL(input).protocol === "file:") {
 			return fetch(input, init);
 		}
+		const requestCacheOption: RequestCache | undefined = init?.cache;
 		const requestCacheControl: boolean = this.#allowCache && new URL(input).protocol === "https:" && (
 			typeof init === "undefined" ||
 			typeof init.method === "undefined" ||
 			init.method.toUpperCase() === "GET"
-		) && init?.cache !== "no-store";
-		const requestCacheOption: RequestCache | undefined = init?.cache;
+		) && requestCacheOption !== "no-store";
 		const requestFuzzy: Request = new Request(input, {
 			...init,
 			cache: undefined,
