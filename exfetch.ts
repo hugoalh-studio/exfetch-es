@@ -397,6 +397,7 @@ function setDelay(value: number, signal?: AbortSignal | undefined): Promise<void
  * Extend `fetch`.
  */
 export class ExFetch {
+	#allowCache = false;
 	#cacheStorage?: Cache;
 	#cacheStorageDefer: Promise<Cache> | undefined = undefined;
 	#httpStatusCodesRetryable: Set<number>;
@@ -440,12 +441,15 @@ export class ExFetch {
 	 */
 	constructor(options: ExFetchOptions = {}) {
 		if (options.cacheStorage instanceof Cache) {
+			this.#allowCache = true;
 			this.#cacheStorage = options.cacheStorage;
 		} else if (typeof options.cacheStorage === "boolean") {
 			if (options.cacheStorage) {
+				this.#allowCache = true;
 				this.#cacheStorageDefer = caches.open("exFetch");
 			}
 		} else if (typeof options.cacheStorage !== "undefined") {
+			this.#allowCache = true;
 			this.#cacheStorageDefer = caches.open(options.cacheStorage);
 		}
 		this.#httpStatusCodesRetryable = new Set<number>((typeof options.httpStatusCodesRetryable === "undefined") ? httpStatusCodesRetryable : options.httpStatusCodesRetryable);
@@ -549,11 +553,11 @@ export class ExFetch {
 		if (new URL(input).protocol === "file:") {
 			return fetch(input, init);
 		}
-		const requestCacheCommonCondition: boolean = new URL(input).protocol === "https:" && (
+		const requestCacheControl: boolean = this.#allowCache && new URL(input).protocol === "https:" && (
 			typeof init === "undefined" ||
 			typeof init.method === "undefined" ||
 			init.method.toUpperCase() === "GET"
-		);
+		) && init?.cache !== "no-store";
 		const requestCacheOption: RequestCache | undefined = init?.cache;
 		const requestFuzzy: Request = new Request(input, {
 			...init,
@@ -567,7 +571,7 @@ export class ExFetch {
 			window: undefined
 		});
 		let responseCached: Response | undefined = undefined;
-		if (requestCacheCommonCondition && requestCacheOption !== "no-store" && requestCacheOption !== "reload") {
+		if (requestCacheControl && requestCacheOption !== "reload") {
 			await this.#cacheStorageLoad();
 			responseCached = await this.#cacheStorage?.match(requestFuzzy);
 		}
@@ -589,7 +593,11 @@ export class ExFetch {
 		if (!requestHeaders.has("User-Agent") && this.#userAgent.length > 0) {
 			requestHeaders.set("User-Agent", this.#userAgent);
 		}
-		const requestRedirectControl: boolean = init?.redirect === "follow" && this.#redirect.maximum !== Infinity;
+		const requestRedirectControl: boolean = this.#redirect.maximum !== Infinity && (
+			typeof init === "undefined" ||
+			typeof init.redirect === "undefined" ||
+			init.redirect === "follow"
+		);
 		let requestSignal: AbortSignal | undefined = init?.signal ?? undefined;
 		if (typeof requestSignal === "undefined" && this.#timeout !== Infinity) {
 			requestSignal = AbortSignal.timeout(this.#timeout);
@@ -666,7 +674,7 @@ export class ExFetch {
 			}
 			await setDelay(delayTime, requestSignal);
 		} while (retries <= this.#retry.maximum);
-		if (requestCacheCommonCondition && requestCacheOption !== "no-store" && response.ok && (
+		if (requestCacheControl && response.ok && (
 			response.headers.has("ETag") ||
 			response.headers.has("Last-Modified")
 		)) {
