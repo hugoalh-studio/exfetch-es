@@ -28,7 +28,7 @@ export const httpStatusCodesRetryable: readonly number[] = Object.freeze([
 /**
  * exFetch default user agent.
  */
-export const userAgentDefault = `Deno/${Deno.version.deno}-${Deno.build.target} exFetch/0.3.0`;
+export const userAgentDefault = `Deno/${Deno.version.deno}-${Deno.build.target} exFetch/0.3.1`;
 /**
  * @access private
  */
