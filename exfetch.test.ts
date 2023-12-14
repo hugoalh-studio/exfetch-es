@@ -1,5 +1,5 @@
-import { assert } from "https://deno.land/std@0.208.0/assert/assert.ts";
-import { assertEquals } from "https://deno.land/std@0.208.0/assert/assert_equals.ts";
+import { assert } from "https://deno.land/std@0.209.0/assert/assert.ts";
+import { assertEquals } from "https://deno.land/std@0.209.0/assert/assert_equals.ts";
 import { ExFetch } from "./exfetch.ts";
 Deno.test("Mono 1", {
 	permissions: {
