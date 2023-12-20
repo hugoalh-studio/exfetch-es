@@ -1,5 +1,5 @@
-import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.10.1/string/is_case_lower.ts";
-import { isStringSingleLine } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.10.1/string/is_singleline.ts";
+import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.11.0/string/is_case_lower.ts";
+import { isStringSingleLine } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.11.0/string/is_singleline.ts";
 const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
 	"rel",
 	"type"
