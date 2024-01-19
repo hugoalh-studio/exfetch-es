@@ -599,10 +599,7 @@ export class ExFetch {
 			typeof init.redirect === "undefined" ||
 			init.redirect === "follow"
 		);
-		let requestSignal: AbortSignal | undefined = init?.signal ?? undefined;
-		if (typeof requestSignal === "undefined" && this.#timeout !== Infinity) {
-			requestSignal = AbortSignal.timeout(this.#timeout);
-		}
+		const requestSignal: AbortSignal | undefined = init?.signal ?? ((this.#timeout === Infinity) ? undefined : AbortSignal.timeout(this.#timeout));
 		let requestFetchInput: string | URL = input;
 		const requestFetchInit: RequestInit = {
 			...init,
