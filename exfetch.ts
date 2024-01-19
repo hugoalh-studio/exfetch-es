@@ -369,6 +369,7 @@ function resolvePaginateOptions(prefix: string, input: ExFetchPaginateOptions, o
 }
 /**
  * Start a `Promise` based delay with `AbortSignal`.
+ * @access private
  * @param {number} value Time of the delay, by milliseconds. `0` means execute "immediately", or more accurately, the next event cycle.
  * @param {AbortSignal | undefined} [signal] A signal object that allow to communicate with a DOM request and abort it if required via an `AbortController` object.
  * @returns {Promise<void>}
