@@ -249,15 +249,10 @@ export interface ExFetchRetryOptions extends Partial<Omit<ExFetchRetryOptionsInt
  */
 export interface ExFetchOptions {
 	/**
-	 * \[EXPERIMENTAL\] Whether to cache suitable `Request`-`Response`s.
-	 * 
-	 * - `false`: Disable cache.
-	 * - `true`: Enable cache with default name, manage automatically.
-	 * - `<string>`: Enable cache with custom name, manage automatically.
-	 * - `<Cache>`: Enable cache, manage manually.
-	 * @default false
+	 * \[EXPERIMENTAL\] A cache storage to cache suitable `Request`-`Response`s.
+	 * @default undefined
 	 */
-	cacheStorage?: boolean | string | Cache;
+	cacheStorage?: Cache;
 	/**
 	 * Custom HTTP status codes that retryable.
 	 * 
@@ -398,9 +393,7 @@ function setDelay(value: number, signal?: AbortSignal | undefined): Promise<void
  * Extend `fetch`.
  */
 export class ExFetch {
-	#allowCache = false;
 	#cacheStorage?: Cache;
-	#cacheStorageDefer?: Promise<Cache>;
 	#httpStatusCodesRetryable: Set<number>;
 	#paginate: ExFetchPaginateOptionsInternal = {
 		delay: {
@@ -441,17 +434,8 @@ export class ExFetch {
 	 * @param {ExFetchOptions} [options={}] Options.
 	 */
 	constructor(options: ExFetchOptions = {}) {
-		if (options.cacheStorage instanceof Cache) {
-			this.#allowCache = true;
+		if (typeof options.cacheStorage !== "undefined") {
 			this.#cacheStorage = options.cacheStorage;
-		} else if (typeof options.cacheStorage === "boolean") {
-			if (options.cacheStorage) {
-				this.#allowCache = true;
-				this.#cacheStorageDefer = caches.open("exFetch");
-			}
-		} else if (typeof options.cacheStorage !== "undefined") {
-			this.#allowCache = true;
-			this.#cacheStorageDefer = caches.open(options.cacheStorage);
 		}
 		this.#httpStatusCodesRetryable = new Set<number>((typeof options.httpStatusCodesRetryable === "undefined") ? httpStatusCodesRetryable : options.httpStatusCodesRetryable);
 		this.#paginate = resolvePaginateOptions("options.paginate", options.paginate ?? {}, this.#paginate);
@@ -483,17 +467,6 @@ export class ExFetch {
 		}
 		if (typeof options.userAgent !== "undefined") {
 			this.#userAgent = options.userAgent;
-		}
-	}
-	/**
-	 * Correctly load cache storage.
-	 * @access private
-	 * @returns {Promise<void>}
-	 */
-	async #cacheStorageLoad(): Promise<void> {
-		if (typeof this.#cacheStorageDefer !== "undefined") {
-			this.#cacheStorage = await this.#cacheStorageDefer;
-			this.#cacheStorageDefer = undefined;
 		}
 	}
 	/**
@@ -555,7 +528,7 @@ export class ExFetch {
 			return fetch(input, init);
 		}
 		const requestCacheOption: RequestCache | undefined = init?.cache;
-		const requestCacheControl: boolean = this.#allowCache && new URL(input).protocol === "https:" && (
+		const requestCacheControl: boolean = typeof this.#cacheStorage !== "undefined" && new URL(input).protocol === "https:" && (
 			typeof init === "undefined" ||
 			typeof init.method === "undefined" ||
 			init.method.toUpperCase() === "GET"
@@ -571,11 +544,7 @@ export class ExFetch {
 			signal: undefined,
 			window: undefined
 		});
-		let responseCached: Response | undefined = undefined;
-		if (requestCacheControl && requestCacheOption !== "reload") {
-			await this.#cacheStorageLoad();
-			responseCached = await this.#cacheStorage?.match(requestFuzzy);
-		}
+		const responseCached: Response | undefined = (requestCacheControl && requestCacheOption !== "reload") ? (await this.#cacheStorage?.match(requestFuzzy)) : undefined;
 		if (requestCacheOption === "force-cache" && typeof responseCached !== "undefined") {
 			return responseCached;
 		}
@@ -676,7 +645,6 @@ export class ExFetch {
 			response.headers.has("ETag") ||
 			response.headers.has("Last-Modified")
 		)) {
-			await this.#cacheStorageLoad();
 			try {
 				await this.#cacheStorage?.put(requestFuzzy, response);
 			} catch {
