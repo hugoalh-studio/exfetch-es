@@ -515,7 +515,7 @@ export class ExFetch {
 	 */
 	addHTTPStatusCodeRetryable(...values: number[]): this;
 	addHTTPStatusCodeRetryable(...values: number[] | [number[]]): this {
-		for (const value of values.flat(Infinity) as number[]) {
+		for (const value of values.flat()) {
 			this.#httpStatusCodesRetryable.add(value);
 		}
 		return this;
@@ -539,7 +539,7 @@ export class ExFetch {
 	 */
 	deleteHTTPStatusCodeRetryable(...values: number[]): this;
 	deleteHTTPStatusCodeRetryable(...values: number[] | [number[]]): this {
-		for (const value of values.flat(Infinity) as number[]) {
+		for (const value of values.flat()) {
 			this.#httpStatusCodesRetryable.delete(value);
 		}
 		return this;
