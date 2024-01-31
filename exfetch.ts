@@ -1,20 +1,14 @@
 import { randomInt } from "node:crypto";
 import { HTTPHeaderLink, type HTTPHeaderLinkEntry } from "./header/link.ts";
 import { HTTPHeaderRetryAfter } from "./header/retry_after.ts";
-/**
- * exFetch HTTP status codes that redirectable.
- */
-const httpStatusCodesRedirectable: readonly number[] = Object.freeze([
+const httpStatusCodesRedirectable: Set<number> = new Set<number>([
 	301,
 	302,
 	303,
 	307,
 	308
 ]);
-/**
- * exFetch HTTP status codes that retryable.
- */
-export const httpStatusCodesRetryable: readonly number[] = Object.freeze([
+const httpStatusCodesRetryable: Set<number> = new Set<number>([
 	408,
 	429,
 	500,
@@ -28,7 +22,7 @@ export const httpStatusCodesRetryable: readonly number[] = Object.freeze([
 /**
  * exFetch default user agent.
  */
-export const userAgentDefault = `Deno/${Deno.version.deno}-${Deno.build.target} exFetch/0.3.1`;
+export const userAgentDefault = `Deno/${Deno.version.deno}-${Deno.build.target} exFetch/0.4.0`;
 /**
  * @access private
  */
@@ -249,14 +243,14 @@ export interface ExFetchRetryOptions extends Partial<Omit<ExFetchRetryOptionsInt
  */
 export interface ExFetchOptions {
 	/**
-	 * \[EXPERIMENTAL\] A cache storage to cache suitable `Request`-`Response`s.
+	 * **\[EXPERIMENTAL\]** A cache storage to cache suitable `Request`-`Response`s.
 	 * @default undefined
 	 */
 	cacheStorage?: Cache;
 	/**
 	 * Custom HTTP status codes that retryable.
 	 * 
-	 * WARNING: This will override the default when defined; To add and/or delete some of the HTTP status codes, use methods `addHTTPStatusCodeRetryable` and/or `deleteHTTPStatusCodeRetryable` instead.
+	 * **WARNING:** This will override the default when defined; To add and/or delete some of the HTTP status codes, use methods `addHTTPStatusCodeRetryable` and/or `deleteHTTPStatusCodeRetryable` instead.
 	 * @default undefined
 	 */
 	httpStatusCodesRetryable?: number[] | Set<number>;
@@ -331,45 +325,16 @@ function resolveDelayTime({ maximum, minimum }: ExFetchDelayOptionsInternal): nu
 	if (maximum === minimum) {
 		return maximum;
 	}
-	return randomInt(minimum, maximum);
-}
-/**
- * @access private
- * @param {string} prefix
- * @param {ExFetchPaginateOptions} input
- * @param {ExFetchPaginateOptionsInternal} original
- * @returns {ExFetchPaginateOptionsInternal}
- */
-function resolvePaginateOptions(prefix: string, input: ExFetchPaginateOptions, original: ExFetchPaginateOptionsInternal): ExFetchPaginateOptionsInternal {
-	const optionsResolve: ExFetchPaginateOptionsInternal = { ...original };
-	if (typeof input.delay !== "undefined") {
-		optionsResolve.delay = resolveDelayOptions(`${prefix}.delay`, input.delay, original.delay);
-	}
-	if (typeof input.linkUpNextPage !== "undefined") {
-		optionsResolve.linkUpNextPage = input.linkUpNextPage;
-	}
-	if (typeof input.maximum !== "undefined") {
-		if (input.maximum !== Infinity && !(Number.isSafeInteger(input.maximum) && input.maximum > 0)) {
-			throw new RangeError(`Argument \`${prefix}.maximum\` is not \`Infinity\`, or a number which is integer, safe, and > 0!`);
-		}
-		optionsResolve.maximum = input.maximum;
-	}
-	if (typeof input.onEvent !== "undefined") {
-		optionsResolve.onEvent = input.onEvent;
-	}
-	if (typeof input.throwOnInvalidHeaderLink !== "undefined") {
-		optionsResolve.throwOnInvalidHeaderLink = input.throwOnInvalidHeaderLink;
-	}
-	return optionsResolve;
+	return randomInt(minimum, maximum + 1);
 }
 /**
  * Start a `Promise` based delay with `AbortSignal`.
  * @access private
  * @param {number} value Time of the delay, by milliseconds. `0` means execute "immediately", or more accurately, the next event cycle.
- * @param {AbortSignal | undefined} [signal] A signal object that allow to communicate with a DOM request and abort it if required via an `AbortController` object.
+ * @param {AbortSignal} [signal] A signal object that allow to communicate with a DOM request and abort it if required via an `AbortController` object.
  * @returns {Promise<void>}
  */
-function setDelay(value: number, signal?: AbortSignal | undefined): Promise<void> {
+function setDelay(value: number, signal?: AbortSignal): Promise<void> {
 	if (value <= 0) {
 		return Promise.resolve();
 	}
@@ -428,17 +393,43 @@ export class ExFetch {
 		onEvent: undefined
 	};
 	#timeout = Infinity;
-	#userAgent: string = userAgentDefault;
+	#userAgent: string;
+	/**
+	 * @access private
+	 * @param {string} prefix
+	 * @param {ExFetchPaginateOptions} input
+	 * @returns {ExFetchPaginateOptionsInternal}
+	 */
+	#resolvePaginateOptions(prefix: string, input: ExFetchPaginateOptions): ExFetchPaginateOptionsInternal {
+		const optionsResolve: ExFetchPaginateOptionsInternal = { ...this.#paginate };
+		if (typeof input.delay !== "undefined") {
+			optionsResolve.delay = resolveDelayOptions(`${prefix}.delay`, input.delay, this.#paginate.delay);
+		}
+		if (typeof input.linkUpNextPage !== "undefined") {
+			optionsResolve.linkUpNextPage = input.linkUpNextPage;
+		}
+		if (typeof input.maximum !== "undefined") {
+			if (input.maximum !== Infinity && !(Number.isSafeInteger(input.maximum) && input.maximum > 0)) {
+				throw new RangeError(`Argument \`${prefix}.maximum\` is not \`Infinity\`, or a number which is integer, safe, and > 0!`);
+			}
+			optionsResolve.maximum = input.maximum;
+		}
+		if (typeof input.onEvent !== "undefined") {
+			optionsResolve.onEvent = input.onEvent;
+		}
+		if (typeof input.throwOnInvalidHeaderLink !== "undefined") {
+			optionsResolve.throwOnInvalidHeaderLink = input.throwOnInvalidHeaderLink;
+		}
+		return optionsResolve;
+	}
 	/**
 	 * Create a new extend `fetch` instance.
 	 * @param {ExFetchOptions} [options={}] Options.
 	 */
 	constructor(options: ExFetchOptions = {}) {
-		if (typeof options.cacheStorage !== "undefined") {
-			this.#cacheStorage = options.cacheStorage;
-		}
-		this.#httpStatusCodesRetryable = new Set<number>((typeof options.httpStatusCodesRetryable === "undefined") ? httpStatusCodesRetryable : options.httpStatusCodesRetryable);
-		this.#paginate = resolvePaginateOptions("options.paginate", options.paginate ?? {}, this.#paginate);
+		this.#cacheStorage = options.cacheStorage;
+		this.#httpStatusCodesRetryable = new Set<number>(options.httpStatusCodesRetryable ?? httpStatusCodesRetryable);
+		this.#paginate = this.#resolvePaginateOptions("options.paginate", options.paginate ?? {});
 		if (typeof options.redirect?.delay !== "undefined") {
 			this.#redirect.delay = resolveDelayOptions("options.redirect.delay", options.redirect.delay, this.#redirect.delay);
 		}
@@ -465,9 +456,7 @@ export class ExFetch {
 			}
 			this.#timeout = options.timeout;
 		}
-		if (typeof options.userAgent !== "undefined") {
-			this.#userAgent = options.userAgent;
-		}
+		this.#userAgent = options.userAgent ?? userAgentDefault;
 	}
 	/**
 	 * Add HTTP status code that retryable.
@@ -528,11 +517,11 @@ export class ExFetch {
 			return fetch(input, init);
 		}
 		const requestCacheOption: RequestCache | undefined = init?.cache;
-		const requestCacheControl: boolean = typeof this.#cacheStorage !== "undefined" && new URL(input).protocol === "https:" && (
+		const requestCacheControl: boolean = typeof this.#cacheStorage !== "undefined" && new URL(input).protocol === "https:" && requestCacheOption !== "no-store" && (
 			typeof init === "undefined" ||
 			typeof init.method === "undefined" ||
 			init.method.toUpperCase() === "GET"
-		) && requestCacheOption !== "no-store";
+		);
 		const requestFuzzy: Request = new Request(input, {
 			...init,
 			cache: undefined,
@@ -544,7 +533,7 @@ export class ExFetch {
 			signal: undefined,
 			window: undefined
 		});
-		const responseCached: Response | undefined = (requestCacheControl && requestCacheOption !== "reload") ? (await this.#cacheStorage?.match(requestFuzzy)) : undefined;
+		const responseCached: Response | undefined = (requestCacheControl && requestCacheOption !== "reload") ? (await this.#cacheStorage?.match(requestFuzzy).catch()) : undefined;
 		if (requestCacheOption === "force-cache" && typeof responseCached !== "undefined") {
 			return responseCached;
 		}
@@ -587,7 +576,7 @@ export class ExFetch {
 				}
 				break;
 			}
-			if (requestRedirectControl && httpStatusCodesRedirectable.includes(response.status)) {
+			if (requestRedirectControl && httpStatusCodesRedirectable.has(response.status)) {
 				if (redirects >= this.#redirect.maximum) {
 					break;
 				}
@@ -645,25 +634,21 @@ export class ExFetch {
 			response.headers.has("ETag") ||
 			response.headers.has("Last-Modified")
 		)) {
-			try {
-				await this.#cacheStorage?.put(requestFuzzy, response);
-			} catch {
-				// Continue on error.
-			}
+			this.#cacheStorage?.put(requestFuzzy, response).catch();
 		}
 		return response;
 	}
 	/**
 	 * Fetch paginate resources from the network.
 	 * 
-	 * IMPORTANT: Only support URL paginate.
+	 * **IMPORTANT:** Only support URL paginate.
 	 * @param {string | URL} input URL of the first page of the resources.
 	 * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
 	 * @param {ExFetchPaginateOptions} [optionsOverride={}] Options.
 	 * @returns {Promise<Response[]>} Responses.
 	 */
 	async fetchPaginate(input: string | URL, init?: Parameters<typeof fetch>[1], optionsOverride: ExFetchPaginateOptions = {}): Promise<Response[]> {
-		const options: ExFetchPaginateOptionsInternal = resolvePaginateOptions("optionsOverride", optionsOverride, this.#paginate);
+		const options: ExFetchPaginateOptionsInternal = this.#resolvePaginateOptions("optionsOverride", optionsOverride);
 		const responses: Response[] = [];
 		for (let page = 1, uri: URL | null | undefined = new URL(input); page <= options.maximum && typeof uri !== "undefined" && uri !== null; page += 1) {
 			if (page > 1) {
@@ -714,7 +699,7 @@ export class ExFetch {
 	/**
 	 * Fetch paginate resources from the network.
 	 * 
-	 * IMPORTANT: Only support URL paginate.
+	 * **IMPORTANT:** Only support URL paginate.
 	 * @param {string | URL} input URL of the first page of the resources.
 	 * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
 	 * @param {ExFetchOptions} [options={}] Options.
@@ -738,7 +723,7 @@ export function exFetch(input: string | URL, init?: Parameters<typeof fetch>[1],
 /**
  * Fetch paginate resources from the network.
  * 
- * IMPORTANT: Only support URL paginate.
+ * **IMPORTANT:** Only support URL paginate.
  * @param {string | URL} input URL of the first page of the resources.
  * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
  * @param {ExFetchOptions} [options={}] Options.
