@@ -1,7 +1,6 @@
 # exFetch (Deno)
 
 [⚖️ MIT](./LICENSE.md)
-[![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/hugoalh-studio/exfetch-deno?label=Grade&logo=codefactor&logoColor=ffffff&style=flat-square "CodeFactor Grade")](https://www.codefactor.io/repository/github/hugoalh-studio/exfetch-deno)
 
 |  | **Release - Latest** | **Release - Pre** |
 |:-:|:-:|:-:|
@@ -37,7 +36,7 @@ This project is inspired from:
 - **Require Permission:**
   - **Network (`allow-net`):**
     - *Resources Domain*
-- **Domain/Registry:**
+- **Registry:**
   - [Deno Land](https://deno.land/x/exfetch)
     ```ts
     import ... from "https://deno.land/x/exfetch[@<Tag>]/mod.ts";
