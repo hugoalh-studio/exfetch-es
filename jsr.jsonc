@@ -1,0 +1,24 @@
+// This file is only for JSR related, non-JSR related must set in file `deno.jsonc`!
+{
+	"name": "@hugoalh/exfetch",
+	"version": "0.4.0",
+	"exports": {
+		"./header/link": "./header/link.ts",
+		"./header/retry_after": "./header/retry_after.ts",
+		"./exfetch": "./exfetch.ts",
+		".": "./mod.ts"
+	},
+	"imports": { },
+	"exclude": [
+		// `exclude` and `include` have incorrect behaviours! For more information, please visit https://github.com/denoland/deno/issues/22648.
+		"**/*.bench.ts",
+		"**/*.cff",
+		"**/*.test.ts",
+		"deno.jsonc",
+		"SECURITY.md",
+		"targets.tsv"
+	],
+	"include": [
+		// `exclude` and `include` have incorrect behaviours! For more information, please visit https://github.com/denoland/deno/issues/22648.
+	]
+}

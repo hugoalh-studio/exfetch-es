@@ -1,12 +1,15 @@
-# exFetch (Deno)
+# exFetch (TypeScript)
 
-[⚖️ MIT](./LICENSE.md)
+[**⚖️** MIT](./LICENSE.md)
 
-|  | **Release - Latest** | **Release - Pre** |
-|:-:|:-:|:-:|
-| [![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=ffffff&style=flat-square "GitHub")](https://github.com/hugoalh-studio/exfetch-deno) | ![GitHub Latest Release Version](https://img.shields.io/github/release/hugoalh-studio/exfetch-deno?sort=semver&label=&style=flat-square "GitHub Latest Release Version") (![GitHub Latest Release Date](https://img.shields.io/github/release-date/hugoalh-studio/exfetch-deno?label=&style=flat-square "GitHub Latest Release Date")) | ![GitHub Latest Pre-Release Version](https://img.shields.io/github/release/hugoalh-studio/exfetch-deno?include_prereleases&sort=semver&label=&style=flat-square "GitHub Latest Pre-Release Version") (![GitHub Latest Pre-Release Date](https://img.shields.io/github/release-date-pre/hugoalh-studio/exfetch-deno?label=&style=flat-square "GitHub Latest Pre-Release Date")) |
+**🗂️**
+[![GitHub: hugoalh-studio/exfetch-ts](https://img.shields.io/badge/hugoalh--studio/exfetch--ts-181717?logo=github&logoColor=ffffff&style=flat "GitHub: hugoalh-studio/exfetch-ts")](https://github.com/hugoalh-studio/exfetch-ts)
+[![Deno Land: exfetch](https://img.shields.io/badge/exfetch-000000?logo=deno&logoColor=ffffff&style=flat "Deno Land: exfetch")](https://deno.land/x/exfetch)
+[![JSR: @hugoalh/exfetch](https://img.shields.io/badge/JSR-@hugoalh/exfetch-F7DF1E?labelColor=F7DF1E&logoColor=000000&style=flat "JSR: @hugoalh/exfetch")](https://jsr.io/@hugoalh/exfetch)
 
-A Deno module to extend `fetch`.
+**🆙** ![Latest Release Version](https://img.shields.io/github/release/hugoalh-studio/exfetch-ts?sort=semver&color=2187C0&label=&style=flat "Latest Release Version") (![Latest Release Date](https://img.shields.io/github/release-date/hugoalh-studio/exfetch-ts?color=2187C0&label=&style=flat "Latest Release Date"))
+
+A TypeScript module to extend `fetch`.
 
 This project is inspired from:
 
@@ -28,46 +31,123 @@ This project is inspired from:
 - Redirect fine control.
 - Simplify URL paginate requests.
 
-## 🔰 Begin
+## 🎯 Target
 
-### Deno
+- Bun ^ v1.0.0
+- Cloudflare Workers
+- Deno >= v1.35.0 / >= v1.41.1 *(Via JSR)*
+  > **🛡️ Require Permission**
+  >
+  > - Network (`allow-net`)
+  >   - *Resource*
+- NodeJS >= v18.12.0
 
-- **Target Version:** >= v1.35.0
-- **Require Permission:**
-  - **Network (`allow-net`):**
-    - *Resources Domain*
-- **Registry:**
-  - [Deno Land](https://deno.land/x/exfetch)
-    ```ts
-    import ... from "https://deno.land/x/exfetch[@<Tag>]/mod.ts";
-    ```
-  - DenoPKG
-    ```ts
-    import ... from "https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts";
-    ```
-  - GitHub Raw *\[Require Tag\]*
-    ```ts
-    import ... from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts";
-    ```
-  - Pax
-    ```ts
-    import ... from "https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts";
-    ```
+### 🔗 Other Edition
 
-> **ℹ️ Notice:** Although it is recommended to import main module with path `mod.ts` in general, it is also able to import part of the module with sub path if available, but do not import if:
+- [JavaScript](https://github.com/hugoalh-studio/exfetch-js)
+
+## 🔰 Usage
+
+### Via HTTPS
+
+> **🎯 Supported Target**
 >
-> - it's file path has an underscore prefix (e.g.: `_foo.ts`, `_util/bar.ts`), or
-> - it is a benchmark or test file (e.g.: `foo.bench.ts`, `foo.test.ts`), or
-> - it's symbol has an underscore prefix (e.g.: `export function _baz() {}`).
+> - Deno
+
+1. Import at the script (`<ScriptName>.ts`):
+    - Via Deno Land
+      ```ts
+      import ... from "https://deno.land/x/exfetch[@<Tag>]/mod.ts";
+      ```
+    - Via DenoPKG
+      ```ts
+      import ... from "https://denopkg.com/hugoalh-studio/exfetch-ts[@<Tag>]/mod.ts";
+      ```
+    - Via DenoPKG (Legacy)
+      ```ts
+      import ... from "https://denopkg.com/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts";
+      ```
+    - Via GitHub Raw (Require Tag)
+      ```ts
+      import ... from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-ts/<Tag>/mod.ts";
+      ```
+    - Via GitHub Raw (Legacy)(Require Tag)
+      ```ts
+      import ... from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/<Tag>/mod.ts";
+      ```
+    - Via Pax
+      ```ts
+      import ... from "https://pax.deno.dev/hugoalh-studio/exfetch-ts[@<Tag>]/mod.ts";
+      ```
+    - Via Pax (Legacy)
+      ```ts
+      import ... from "https://pax.deno.dev/hugoalh-studio/exfetch-deno[@<Tag>]/mod.ts";
+      ```
+    > **ℹ️ Note**
+    >
+    > Although it is recommended to import the entire module with the main path `mod.ts`, it is also able to import part of the module with sub path if available, but do not import if:
+    >
+    > - it's file path has an underscore prefix (e.g.: `_foo.ts`, `_util/bar.ts`), or
+    > - it is a benchmark or test file (e.g.: `foo.bench.ts`, `foo.test.ts`), or
+    > - it's symbol has an underscore prefix (e.g.: `export function _baz() {}`).
+    >
+    > These elements are not considered part of the public API, thus no stability is guaranteed for them.
+
+### Via JSR With Native Support
+
+> **🎯 Supported Target**
 >
-> These elements are not considered part of the public API, thus no stability is guaranteed for them.
+> - Deno
+
+1. Import at the script (`<ScriptName>.ts`):
+    ```ts
+    import ... from "jsr:@hugoalh/exfetch[@<Tag>]";
+    ```
+    > **ℹ️ Note**
+    >
+    > Although it is recommended to import the entire module, it is also able to import part of the module with sub path if available, please visit [file `jsr.jsonc`](./jsr.jsonc) property `exports` for available sub paths.
+
+### Via JSR With NPM Compatibility Layer Support
+
+> **🎯 Supported Target**
+>
+> - Bun
+> - Cloudflare Workers
+> - NodeJS
+
+1. Install via console/shell/terminal:
+    - Via Bun
+      ```sh
+      bunx jsr add @hugoalh/exfetch[@<Tag>]
+      ```
+    - Via NPM
+      ```sh
+      npx jsr add @hugoalh/exfetch[@<Tag>]
+      ```
+    - Via PNPM
+      ```sh
+      pnpm dlx jsr add @hugoalh/exfetch[@<Tag>]
+      ```
+    - Via Yarn
+      ```sh
+      yarn dlx jsr add @hugoalh/exfetch[@<Tag>]
+      ```
+2. Import at the script (`<ScriptName>.ts`):
+    ```ts
+    import ... from "@hugoalh/exfetch";
+    ```
+    > **ℹ️ Note**
+    >
+    > Although it is recommended to import the entire module, it is also able to import part of the module with sub path if available, please visit [file `jsr.jsonc`](./jsr.jsonc) property `exports` for available sub paths.
 
 ## 🧩 API (Excerpt)
 
-> **ℹ️ Notice:** Documentation is included inside the script file, can view it via:
+> **ℹ️ Note**
+>
+> For the prettier documentation, can visit via:
 >
 > - [Deno CLI `deno doc`](https://deno.land/manual/tools/documentation_generator)
-> - [Deno Doc Land](https://doc.deno.land)
+> - [JSR](https://jsr.io/@hugoalh/shuffle-array)
 
 ### Class
 
@@ -83,7 +163,6 @@ This project is inspired from:
 ## ✍️ Example
 
 - ```ts
-  import { exFetchPaginate } from "https://raw.githubusercontent.com/hugoalh-studio/exfetch-deno/main/exfetch.ts";
   const responses: Response[] = await exFetchPaginate("https://api.github.com/repos/microsoft/vscode/labels?per_page=100");
 
   responses.map((response: Response) => {
@@ -147,7 +226,3 @@ This project is inspired from:
   ]
   */
   ```
-
-## 🔗 Other Edition
-
-- [NodeJS](https://github.com/hugoalh-studio/exfetch-nodejs)

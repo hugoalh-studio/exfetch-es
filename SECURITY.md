@@ -10,13 +10,13 @@
 > | 🟠 | Maintenance |
 > | 🔴 | End Of Life / Not Supported |
 
-| **Versions** | **Status** | **🔵 Date** | **🟢 Date** | **🔴 Date** | **Target - Deno** |
-|:-:|:-:|:-:|:-:|:-:|:-:|
-| v0.4.X | 🟤 | *Unknown* | *N/A* | *Unknown* | >= v1.35.0 |
-| v0.3.X | 🔵 | 2023-11-16 | *N/A* | *Unknown* | >= v1.35.0 |
-| v0.2.X | 🔴 | 2023-09-08 | *N/A* | 2023-12-01 | >= v1.35.0 |
+| **Versions** | **Status** | **🔵 Date** | **🟢 Date** | **🔴 Date** |
+|:-:|:-:|:-:|:-:|:-:|
+| v0.4.X | 🟤 | *Unknown* | *N/A* | *Unknown* |
+| v0.3.X | 🔵 | 2023-11-16 | *N/A* | *Unknown* |
+| v0.2.X | 🔴 | 2023-09-08 | *N/A* | 2023-12-01 |
 
-> **ℹ️ Notice:**
+> **ℹ️ Note**
 >
 > - The date format is according to ISO 8601 standard.
 > - Values in italic format are subject to change.
