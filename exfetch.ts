@@ -22,7 +22,7 @@ const httpStatusCodesRetryable: Set<number> = new Set<number>([
 /**
  * exFetch default user agent.
  */
-export const userAgentDefault = `Deno/${Deno.version.deno}-${Deno.build.target} exFetch/0.4.0`;
+export const userAgentDefault: string = `Deno/${Deno.version.deno}-${Deno.build.target} exFetch/0.4.0`;
 /**
  * @access private
  */

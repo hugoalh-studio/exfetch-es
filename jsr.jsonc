@@ -15,8 +15,7 @@
 		"**/*.cff",
 		"**/*.test.ts",
 		"deno.jsonc",
-		"SECURITY.md",
-		"targets.tsv"
+		"SECURITY.md"
 	],
 	"include": [
 		// `exclude` and `include` have incorrect behaviours! For more information, please visit https://github.com/denoland/deno/issues/22648.
