@@ -2,19 +2,32 @@
 
 ## Supported Versions
 
-> | **Legend** | **Description** |
-> |:-:|:--|
-> | 🟤 | Pending / Pre Release / Unstable |
-> | 🔵 | Current Release |
-> | 🟢 | Long Term Support |
-> | 🟠 | Maintenance |
-> | 🔴 | End Of Life / Not Supported |
+> ```mermaid
+> ---
+> title: Versions Status Flow
+> ---
+> flowchart LR
+>   Unstable("Unstable")
+>   Pre("Pre Release")
+>   Release("Release")
+>   LTS("Long Term Support")
+>   Maintenance("Maintenance")
+>   EOL("End Of Life / Not Supported")
+>   Unstable --> Pre
+>   Pre --> Release
+>   subgraph Support
+>     Release -- Major = 0 --> Maintenance
+>     Release -- Major > 0 --> LTS
+>     LTS --> Maintenance
+>   end
+>   Maintenance --> EOL
+> ```
 
-| **Versions** | **Status** | **🔵 Date** | **🟢 Date** | **🔴 Date** |
-|:-:|:-:|:-:|:-:|:-:|
-| v0.4.X | 🟤 | *Unknown* | *N/A* | *Unknown* |
-| v0.3.X | 🔵 | 2023-11-16 | *N/A* | *Unknown* |
-| v0.2.X | 🔴 | 2023-09-08 | *N/A* | 2023-12-01 |
+| **Versions** | **Release Date** | **Long Term Support Date** | **End Of Life Date / Not Supported Date** |
+|:-:|:-:|:-:|:-:|
+| v0.4.X | *Unknown* | *N/A* | *Unknown* |
+| v0.3.X | 2023-11-16 | *N/A* | *Unknown* |
+| v0.2.X | 2023-09-08 | *N/A* | 2023-12-01 |
 
 > **ℹ️ Note**
 >
