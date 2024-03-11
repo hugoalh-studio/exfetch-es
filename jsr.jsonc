@@ -4,18 +4,29 @@
 	"version": "0.4.0",
 	"exports": {
 		"./header/link": "./header/link.ts",
-		"./header/retry_after": "./header/retry_after.ts",
+		"./header/retry-after": "./header/retry_after.ts",
 		"./exfetch": "./exfetch.ts",
 		".": "./mod.ts"
 	},
 	"imports": { },
 	"publish": {
 		"exclude": [
+			"**/*_bench.ts",
+			"**/*_bench.tsx",
+			"**/*_test.ts",
+			"**/*_test.tsx",
 			"**/*.bench.ts",
-			"**/*.test.ts"
+			"**/*.bench.tsx",
+			"**/*.test.ts",
+			"**/*.test.tsx",
+			"**/bench.ts",
+			"**/bench.tsx",
+			"**/test.ts",
+			"**/test.tsx"
 		],
 		"include": [
 			"**/*.ts",
+			"**/*.tsx",
 			"jsr.jsonc",
 			"LICENSE*.md",
 			"README*.md"
