@@ -1,5 +1,4 @@
-import { isStringCaseLower } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.14.1/string/is_case_lower.ts";
-import { isStringSingleLine } from "https://raw.githubusercontent.com/hugoalh-studio/advanced-determine-deno/v0.14.1/string/is_singleline.ts";
+import { isStringSingleLine } from "https://raw.githubusercontent.com/hugoalh-studio/is-string-singleline-ts/v1.0.0/mod.ts";
 const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
 	"rel",
 	"type"
@@ -172,12 +171,12 @@ export class HTTPHeaderLink {
 				checkURI(uri);
 				Object.entries(parameters).forEach(([parameterKey, parameterValue]: [string, string]) => {
 					if (
-						!isStringCaseLower(parameterKey) ||
+						parameterKey !== parameterKey.toLowerCase() ||
 						!(/^[\w-]+\*?$/u.test(parameterKey))
 					) {
 						throw new SyntaxError(`\`${parameterKey}\` is not a valid parameter key!`);
 					}
-					if (httpHeaderLinkParametersNeedLowerCase.has(parameterKey) && !isStringCaseLower(parameterValue)) {
+					if (httpHeaderLinkParametersNeedLowerCase.has(parameterKey) && parameterValue !== parameterValue.toLowerCase()) {
 						throw new SyntaxError(`\`${parameterValue}\` is not a valid parameter value!`);
 					}
 				});
@@ -204,7 +203,7 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	getByParameter(key: string, value: string): HTTPHeaderLinkEntry[] {
-		if (!isStringCaseLower(key)) {
+		if (key !== key.toLowerCase()) {
 			throw new SyntaxError(`\`${key}\` is not a valid parameter key!`);
 		}
 		if (key === "rel") {
@@ -220,7 +219,7 @@ export class HTTPHeaderLink {
 	 * @returns {HTTPHeaderLinkEntry[]} Entries.
 	 */
 	getByRel(value: string): HTTPHeaderLinkEntry[] {
-		if (!isStringCaseLower(value)) {
+		if (value !== value.toLowerCase()) {
 			throw new SyntaxError(`\`${value}\` is not a valid parameter \`rel\` value!`);
 		}
 		return this.#entries.filter((entity: HTTPHeaderLinkEntry): boolean => {

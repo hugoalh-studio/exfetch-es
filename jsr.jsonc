@@ -8,7 +8,9 @@
 		"./exfetch": "./exfetch.ts",
 		".": "./mod.ts"
 	},
-	"imports": { },
+	"imports": {
+		"https://raw.githubusercontent.com/hugoalh-studio/is-string-singleline-ts/v1.0.0/mod.ts": "jsr:@hugoalh/is-string-singleline@1.0.0"
+	},
 	"publish": {
 		"exclude": [
 			"**/*_bench.ts",
