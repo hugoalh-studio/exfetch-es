@@ -3,9 +3,9 @@
 	"name": "@hugoalh/exfetch",
 	"version": "0.4.0",
 	"exports": {
+		"./exfetch": "./exfetch.ts",
 		"./header/link": "./header/link.ts",
 		"./header/retry-after": "./header/retry_after.ts",
-		"./exfetch": "./exfetch.ts",
 		".": "./mod.ts"
 	},
 	"imports": {
