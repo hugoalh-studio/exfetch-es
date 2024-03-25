@@ -200,7 +200,6 @@ interface ExFetchRedirectOptionsInternal extends Required<Omit<ExFetchRedirectOp
 	 */
 	delay: ExFetchDelayOptionsInternal;
 }
-
 /**
  * exFetch retry options.
  */
