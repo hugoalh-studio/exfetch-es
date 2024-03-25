@@ -4,15 +4,15 @@ const httpHeaderLinkParametersNeedLowerCase: Set<string> = new Set<string>([
 	"type"
 ]);
 /**
- * Check URI.
+ * Validate URI.
  * @access private
  * @param {string} uri
  * @returns {void}
  */
-function checkURI(uri: string): void {
+function validateURI(uri: string): void {
 	if (
 		!isStringSingleLine(uri) ||
-		/[\s\t]/u.test(uri)
+		/[\s\t]/.test(uri)
 	) {
 		throw new SyntaxError(`${uri} is not a valid URI!`);
 	}
@@ -73,7 +73,7 @@ export class HTTPHeaderLink {
 				throw new SyntaxError(`Missing URI at position ${cursor}!`);
 			}
 			const uriSlice: string = valueResolve.slice(cursor, cursorEndURI);
-			checkURI(uriSlice);
+			validateURI(uriSlice);
 			const uri: HTTPHeaderLinkEntry[0] = decodeURI(uriSlice);
 			const parameters: HTTPHeaderLinkEntry[1] = {};
 			cursor = cursorEndURI + 1;
@@ -91,7 +91,7 @@ export class HTTPHeaderLink {
 			cursor += 1;
 			while (cursor < valueResolve.length) {
 				cursor += cursorWhitespaceSkipper(valueResolve, cursor);
-				const parameterKey: string | undefined = valueResolve.slice(cursor).match(/^[\w-]+\*?/u)?.[0].toLowerCase();
+				const parameterKey: string | undefined = valueResolve.slice(cursor).match(/^[\w-]+\*?/)?.[0].toLowerCase();
 				if (typeof parameterKey === "undefined") {
 					throw new SyntaxError(`Unexpected character "${valueResolve.charAt(cursor)}" at position ${cursor}; Expect a valid parameter key!`);
 				}
@@ -129,7 +129,7 @@ export class HTTPHeaderLink {
 						cursor += 1;
 					}
 				} else {
-					const cursorDiffParameterValue: number = valueResolve.slice(cursor).search(/[\s;,]/u);
+					const cursorDiffParameterValue: number = valueResolve.slice(cursor).search(/[\s;,]/);
 					if (cursorDiffParameterValue === -1) {
 						parameterValue += valueResolve.slice(cursor);
 						cursor += parameterValue.length;
@@ -168,11 +168,11 @@ export class HTTPHeaderLink {
 		} else if (Array.isArray(value)) {
 			for (const entry of value) {
 				const [uri, parameters] = entry;
-				checkURI(uri);
+				validateURI(uri);
 				Object.entries(parameters).forEach(([parameterKey, parameterValue]: [string, string]) => {
 					if (
 						parameterKey !== parameterKey.toLowerCase() ||
-						!(/^[\w-]+\*?$/u.test(parameterKey))
+						!(/^[\w-]+\*?$/.test(parameterKey))
 					) {
 						throw new SyntaxError(`\`${parameterKey}\` is not a valid parameter key!`);
 					}
@@ -244,7 +244,7 @@ export class HTTPHeaderLink {
 			const [uri, parameters] = entry;
 			let result = `<${encodeURI(uri)}>`;
 			for (const [key, value] of Object.entries(parameters)) {
-				result += (value.length > 0) ? `; ${key}="${value.replace(/"/g, "\\\"")}"` : `; ${key}`;
+				result += (value.length > 0) ? `; ${key}="${value.replaceAll("\"", "\\\"")}"` : `; ${key}`;
 			}
 			return result;
 		}).join(", ");

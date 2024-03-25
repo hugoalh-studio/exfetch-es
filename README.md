@@ -39,7 +39,6 @@ This project is inspired from:
   > **🛡️ Require Permission**
   >
   > - Network (`allow-net`)
-  >   - *Resource*
 - NodeJS >= v18.12.0
 
 ### 🔗 Other Edition
