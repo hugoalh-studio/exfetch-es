@@ -273,7 +273,7 @@ export interface ExFetchOptions {
 	timeout?: number;
 	/**
 	 * Custom user agent. This only apply when have not define HTTP header `User-Agent` in the request.
-	 * @default `<RuntimeSlug> exFetch/<ExFetchVersion>`.
+	 * @default `${RuntimeSlug} exFetch/${ExFetchVersion}`.
 	 */
 	userAgent?: string;
 }
