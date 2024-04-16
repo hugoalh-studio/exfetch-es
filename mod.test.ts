@@ -1,6 +1,6 @@
-import { assert } from "TEST/assert.ts";
-import { assertEquals } from "TEST/assert_equals.ts";
-import { ExFetch } from "./exfetch.ts";
+import { assert } from "STD/assert/assert.ts";
+import { assertEquals } from "STD/assert/assert_equals.ts";
+import { ExFetch } from "./mod.ts";
 Deno.test("Mono 1", {
 	permissions: {
 		net: ["jsonplaceholder.typicode.com"]

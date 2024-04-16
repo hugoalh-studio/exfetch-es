@@ -25,8 +25,11 @@
 
 | **Versions** | **Release Date** | **Long Term Support Date** | **End Of Life Date** |
 |:-:|:-:|:-:|:-:|
-| v0.4.X | 2024-03-25 | *N/A* | *Unknown* |
-| v0.3.X | 2023-11-16 | *N/A* | *Unknown* |
+| v0.5.X | 2024-04-16 | *N/A* | *Unknown* |
+| v0.4.X (For Non-NPM) | 2024-03-25 | *N/A* | 2024-10-16 |
+| v0.3.X (For NPM Only) | 2024-01-14 | *N/A* | 2024-10-16 |
+| v0.3.X (For Non-NPM) | 2023-11-16 | *N/A* | 2024-10-16 |
+| v0.2.X (For NPM Only) | 2023-11-16 | *N/A* | 2024-03-15 |
 
 > **ℹ️ Note**
 >
