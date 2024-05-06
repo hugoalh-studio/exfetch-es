@@ -1,6 +1,6 @@
 import { randomInt } from "node:crypto";
-import { HTTPHeaderLink, type HTTPHeaderLinkEntry } from "https://raw.githubusercontent.com/hugoalh-studio/http-header-link-es/v1.0.1/mod.ts";
-import { HTTPHeaderRetryAfter } from "https://raw.githubusercontent.com/hugoalh-studio/http-header-retry-after-es/v1.0.0/mod.ts";
+import { HTTPHeaderLink, type HTTPHeaderLinkEntry } from "https://raw.githubusercontent.com/hugoalh-studio/http-header-link-es/v1.0.2/mod.ts";
+import { HTTPHeaderRetryAfter } from "https://raw.githubusercontent.com/hugoalh-studio/http-header-retry-after-es/v1.0.1/mod.ts";
 import { slug } from "./_slug.ts";
 const httpStatusCodesRedirectable: Set<number> = new Set<number>([
 	301,
@@ -23,7 +23,7 @@ const httpStatusCodesRetryable: Set<number> = new Set<number>([
 /**
  * exFetch default user agent.
  */
-export const userAgentDefault: string = `${slug} exFetch/0.5.0`;
+export const userAgentDefault: string = `${slug} exFetch/0.5.1`;
 /**
  * exFetch delay options.
  */
@@ -357,9 +357,11 @@ function setDelay(value: number, signal?: AbortSignal): Promise<void> {
 /**
  * Extend `fetch`.
  * 
- * > **🛡️ Require Permission**
+ * > **🛡️ Permissions**
  * >
- * > - Network (`allow-net`)
+ * > | **Target** | **Type** | **Coverage** |
+ * > |:--|:--|:--|
+ * > | Deno | Network (`allow-net`) | Resource |
  */
 export class ExFetch {
 	#cacheStorage?: Cache;
@@ -430,9 +432,11 @@ export class ExFetch {
 	/**
 	 * Create a new extend `fetch` instance.
 	 * 
-	 * > **🛡️ Require Permission**
+	 * > **🛡️ Permissions**
 	 * >
-	 * > - Network (`allow-net`)
+	 * > | **Target** | **Type** | **Coverage** |
+	 * > |:--|:--|:--|
+	 * > | Deno | Network (`allow-net`) | Resource |
 	 * @param {ExFetchOptions} [options={}] Options.
 	 */
 	constructor(options: ExFetchOptions = {}) {
@@ -539,14 +543,16 @@ export class ExFetch {
 	/**
 	 * Fetch a resource from the network with extend features.
 	 * 
-	 * > **🛡️ Require Permission**
+	 * > **🛡️ Permissions**
 	 * >
-	 * > - Network (`allow-net`)
+	 * > | **Target** | **Type** | **Coverage** |
+	 * > |:--|:--|:--|
+	 * > | Deno | Network (`allow-net`) | Resource |
 	 * @param {string | URL} input URL of the resource.
-	 * @param {Parameters<typeof fetch>[1]} [init] Custom setting that apply to the request.
+	 * @param {RequestInit} [init] Custom setting that apply to the request.
 	 * @returns {Promise<Response>} Response.
 	 */
-	async fetch(input: string | URL, init?: Parameters<typeof fetch>[1]): Promise<Response> {
+	async fetch(input: string | URL, init?: RequestInit): Promise<Response> {
 		if (new URL(input).protocol === "file:") {
 			return fetch(input, init);
 		}
@@ -682,17 +688,19 @@ export class ExFetch {
 	 * 
 	 * > **⚠️ Important**
 	 * >
-	 * > Only support URL paginate.
+	 * > Support URL paginate only.
 	 * 
-	 * > **🛡️ Require Permission**
+	 * > **🛡️ Permissions**
 	 * >
-	 * > - Network (`allow-net`)
+	 * > | **Target** | **Type** | **Coverage** |
+	 * > |:--|:--|:--|
+	 * > | Deno | Network (`allow-net`) | Resource |
 	 * @param {string | URL} input URL of the first page of the resources.
-	 * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
+	 * @param {RequestInit} init Custom setting that apply to each request.
 	 * @param {ExFetchPaginateOptions} [optionsOverride={}] Options.
 	 * @returns {Promise<Response[]>} Responses.
 	 */
-	async fetchPaginate(input: string | URL, init?: Parameters<typeof fetch>[1], optionsOverride: ExFetchPaginateOptions = {}): Promise<Response[]> {
+	async fetchPaginate(input: string | URL, init?: RequestInit, optionsOverride: ExFetchPaginateOptions = {}): Promise<Response[]> {
 		const options: ExFetchPaginateOptionsInternal = this.#resolvePaginateOptions("optionsOverride", optionsOverride);
 		const responses: Response[] = [];
 		for (let page = 1, uri: URL | null | undefined = new URL(input); page <= options.maximum && typeof uri !== "undefined" && uri !== null; page += 1) {
@@ -734,15 +742,17 @@ export class ExFetch {
 	/**
 	 * Fetch a resource from the network.
 	 * 
-	 * > **🛡️ Require Permission**
+	 * > **🛡️ Permissions**
 	 * >
-	 * > - Network (`allow-net`)
+	 * > | **Target** | **Type** | **Coverage** |
+	 * > |:--|:--|:--|
+	 * > | Deno | Network (`allow-net`) | Resource |
 	 * @param {string | URL} input URL of the resource.
-	 * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to the request.
+	 * @param {RequestInit} init Custom setting that apply to the request.
 	 * @param {ExFetchOptions} [options={}] Options.
 	 * @returns {Promise<Response>} Response.
 	 */
-	static fetch(input: string | URL, init?: Parameters<typeof fetch>[1], options: ExFetchOptions = {}): Promise<Response> {
+	static fetch(input: string | URL, init?: RequestInit, options: ExFetchOptions = {}): Promise<Response> {
 		return new this(options).fetch(input, init);
 	}
 	/**
@@ -750,17 +760,19 @@ export class ExFetch {
 	 * 
 	 * > **⚠️ Important**
 	 * >
-	 * > Only support URL paginate.
+	 * > Support URL paginate only.
 	 * 
-	 * > **🛡️ Require Permission**
+	 * > **🛡️ Permissions**
 	 * >
-	 * > - Network (`allow-net`)
+	 * > | **Target** | **Type** | **Coverage** |
+	 * > |:--|:--|:--|
+	 * > | Deno | Network (`allow-net`) | Resource |
 	 * @param {string | URL} input URL of the first page of the resources.
-	 * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
+	 * @param {RequestInit} init Custom setting that apply to each request.
 	 * @param {ExFetchOptions} [options={}] Options.
 	 * @returns {Promise<Response[]>} Responses.
 	 */
-	static fetchPaginate(input: string | URL, init?: Parameters<typeof fetch>[1], options: ExFetchOptions = {}): Promise<Response[]> {
+	static fetchPaginate(input: string | URL, init?: RequestInit, options: ExFetchOptions = {}): Promise<Response[]> {
 		return new this(options).fetchPaginate(input, init);
 	}
 }
@@ -768,15 +780,17 @@ export default ExFetch;
 /**
  * Fetch a resource from the network.
  * 
- * > **🛡️ Require Permission**
+ * > **🛡️ Permissions**
  * >
- * > - Network (`allow-net`)
+ * > | **Target** | **Type** | **Coverage** |
+ * > |:--|:--|:--|
+ * > | Deno | Network (`allow-net`) | Resource |
  * @param {string | URL} input URL of the resource.
- * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to the request.
+ * @param {RequestInit} init Custom setting that apply to the request.
  * @param {ExFetchOptions} [options={}] Options.
  * @returns {Promise<Response>} Response.
  */
-export function exFetch(input: string | URL, init?: Parameters<typeof fetch>[1], options: ExFetchOptions = {}): Promise<Response> {
+export function exFetch(input: string | URL, init?: RequestInit, options: ExFetchOptions = {}): Promise<Response> {
 	return new ExFetch(options).fetch(input, init);
 }
 /**
@@ -784,16 +798,18 @@ export function exFetch(input: string | URL, init?: Parameters<typeof fetch>[1],
  * 
  * > **⚠️ Important**
  * >
- * > Only support URL paginate.
+ * > Support URL paginate only.
  * 
- * > **🛡️ Require Permission**
+ * > **🛡️ Permissions**
  * >
- * > - Network (`allow-net`)
+ * > | **Target** | **Type** | **Coverage** |
+ * > |:--|:--|:--|
+ * > | Deno | Network (`allow-net`) | Resource |
  * @param {string | URL} input URL of the first page of the resources.
- * @param {Parameters<typeof fetch>[1]} init Custom setting that apply to each request.
+ * @param {RequestInit} init Custom setting that apply to each request.
  * @param {ExFetchOptions} [options={}] Options.
  * @returns {Promise<Response[]>} Responses.
  */
-export function exFetchPaginate(input: string | URL, init?: Parameters<typeof fetch>[1], options: ExFetchOptions = {}): Promise<Response[]> {
+export function exFetchPaginate(input: string | URL, init?: RequestInit, options: ExFetchOptions = {}): Promise<Response[]> {
 	return new ExFetch(options).fetchPaginate(input, init);
 }

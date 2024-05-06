@@ -1,13 +1,13 @@
-// This file is only for JSR related, non-JSR related must set in the file `deno.jsonc`!
 {
+	"$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
 	"name": "@hugoalh/exfetch",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"exports": {
 		".": "./mod.ts"
 	},
 	"imports": {
-		"https://raw.githubusercontent.com/hugoalh-studio/http-header-link-es/v1.0.1/mod.ts": "jsr:@hugoalh/http-header-link@1.0.1",
-		"https://raw.githubusercontent.com/hugoalh-studio/http-header-retry-after-es/v1.0.0/mod.ts": "jsr:@hugoalh/http-header-retry-after@1.0.0"
+		"https://raw.githubusercontent.com/hugoalh-studio/http-header-link-es/v1.0.2/mod.ts": "jsr:@hugoalh/http-header-link@1.0.2",
+		"https://raw.githubusercontent.com/hugoalh-studio/http-header-retry-after-es/v1.0.1/mod.ts": "jsr:@hugoalh/http-header-retry-after@1.0.1"
 	},
 	"publish": {
 		"exclude": [
@@ -27,6 +27,7 @@
 			"npm/**"
 		],
 		"include": [
+			"**/*.json",
 			"**/*.ts",
 			"**/*.tsx",
 			"jsr.jsonc",
