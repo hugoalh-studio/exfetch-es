@@ -49,6 +49,10 @@ An ES (JavaScript & TypeScript) module to extend `fetch`.
 
 ### #️⃣ Remote Import Paths
 
+- **Deno Land:**
+  ```
+  https://deno.land/x/exfetch[@${Tag}]/mod.ts
+  ```
 - **GitHub Raw:** (Require Tag)
   ```
   https://raw.githubusercontent.com/hugoalh-studio/exfetch-es/${Tag}/mod.ts
@@ -64,6 +68,7 @@ An ES (JavaScript & TypeScript) module to extend `fetch`.
 >
 >   These elements are not considered part of the public API, thus no stability is guaranteed for them.
 > - Although there have 3rd party services which provide enhanced, equal, or similar methods/ways to remote import the module, beware these services maybe inject unrelated elements and thus affect the security.
+> - It is recommended to use this module with tag for immutability.
 
 ### 🛡️ Permissions
 
