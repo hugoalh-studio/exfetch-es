@@ -280,15 +280,15 @@ export interface ExFetchOptions {
 /**
  * Resolve delay options.
  * @access private
- * @param {string} prefix
+ * @param {string} parameterName Name of the parameter.
  * @param {number | ExFetchDelayOptions} input
  * @param {ExFetchDelayOptionsInternal} original
  * @returns {ExFetchDelayOptionsInternal}
  */
-function resolveDelayOptions(prefix: string, input: number | ExFetchDelayOptions, original: ExFetchDelayOptionsInternal): ExFetchDelayOptionsInternal {
+function resolveDelayOptions(parameterName: string, input: number | ExFetchDelayOptions, original: ExFetchDelayOptionsInternal): ExFetchDelayOptionsInternal {
 	if (typeof input === "number") {
 		if (!(Number.isSafeInteger(input) && input >= 0)) {
-			throw new RangeError(`Argument \`${prefix}\` is not a number which is integer, positive, and safe!`);
+			throw new RangeError(`\`${input}\` (parameter \`${parameterName}\`) is not a number which is integer, positive, and safe!`);
 		}
 		return {
 			maximum: input,
@@ -300,18 +300,18 @@ function resolveDelayOptions(prefix: string, input: number | ExFetchDelayOptions
 	const optionsResolve: ExFetchDelayOptionsInternal = { ...original };
 	if (typeof input.maximum !== "undefined") {
 		if (!(Number.isSafeInteger(input.maximum) && input.maximum >= 0)) {
-			throw new RangeError(`Argument \`${prefix}.maximum\` is not a number which is integer, positive, and safe!`);
+			throw new RangeError(`\`${input.maximum}\` (parameter \`${parameterName}.maximum\`) is not a number which is integer, positive, and safe!`);
 		}
 		optionsResolve.maximum = input.maximum;
 	}
 	if (typeof input.minimum !== "undefined") {
 		if (!(Number.isSafeInteger(input.minimum) && input.minimum >= 0)) {
-			throw new RangeError(`Argument \`${prefix}.minimum\` is not a number which is integer, positive, and safe!`);
+			throw new RangeError(`\`${input.minimum}\` (parameter \`${parameterName}.minimum\`) is not a number which is integer, positive, and safe!`);
 		}
 		optionsResolve.minimum = input.minimum;
 	}
 	if (optionsResolve.minimum > optionsResolve.maximum) {
-		throw new RangeError(`Argument \`${prefix}.minimum\` is large than argument \`${prefix}.maximum\`!`);
+		throw new RangeError(`\`${optionsResolve.minimum}\` (parameter \`${parameterName}.minimum\`) is large than \`${optionsResolve.maximum}\` (parameter \`${parameterName}.maximum\`)!`);
 	}
 	return optionsResolve;
 }
@@ -403,21 +403,21 @@ export class ExFetch {
 	#userAgent: string;
 	/**
 	 * @access private
-	 * @param {string} prefix
+	 * @param {string} parameterName Name of the parameter.
 	 * @param {ExFetchPaginateOptions} input
 	 * @returns {ExFetchPaginateOptionsInternal}
 	 */
-	#resolvePaginateOptions(prefix: string, input: ExFetchPaginateOptions): ExFetchPaginateOptionsInternal {
+	#resolvePaginateOptions(parameterName: string, input: ExFetchPaginateOptions): ExFetchPaginateOptionsInternal {
 		const optionsResolve: ExFetchPaginateOptionsInternal = { ...this.#paginate };
 		if (typeof input.delay !== "undefined") {
-			optionsResolve.delay = resolveDelayOptions(`${prefix}.delay`, input.delay, this.#paginate.delay);
+			optionsResolve.delay = resolveDelayOptions(`${parameterName}.delay`, input.delay, this.#paginate.delay);
 		}
 		if (typeof input.linkUpNextPage !== "undefined") {
 			optionsResolve.linkUpNextPage = input.linkUpNextPage;
 		}
 		if (typeof input.maximum !== "undefined") {
 			if (input.maximum !== Infinity && !(Number.isSafeInteger(input.maximum) && input.maximum > 0)) {
-				throw new RangeError(`Argument \`${prefix}.maximum\` is not \`Infinity\`, or a number which is integer, safe, and > 0!`);
+				throw new RangeError(`\`${input.maximum}\` (parameter \`${parameterName}.maximum\`) is not \`Infinity\`, or a number which is integer, safe, and > 0!`);
 			}
 			optionsResolve.maximum = input.maximum;
 		}
@@ -458,7 +458,7 @@ export class ExFetch {
 		}
 		if (typeof options.redirect?.maximum !== "undefined") {
 			if (!(Number.isSafeInteger(options.redirect.maximum) && options.redirect.maximum >= 0)) {
-				throw new RangeError(`Argument \`options.redirect.maximum\` is not a number which is integer, positive, and safe!`);
+				throw new RangeError(`\`${options.redirect.maximum}\` (parameter \`options.redirect.maximum\`) is not a number which is integer, positive, and safe!`);
 			}
 			this.#redirect.maximum = options.redirect.maximum;
 		}
@@ -468,14 +468,14 @@ export class ExFetch {
 		}
 		if (typeof options.retry?.maximum !== "undefined") {
 			if (!(Number.isSafeInteger(options.retry.maximum) && options.retry.maximum >= 0)) {
-				throw new RangeError(`Argument \`options.retry.maximum\` is not a number which is integer, positive, and safe!`);
+				throw new RangeError(`\`${options.retry.maximum}\` (parameter \`options.retry.maximum\`) is not a number which is integer, positive, and safe!`);
 			}
 			this.#retry.maximum = options.retry.maximum;
 		}
 		this.#retry.onEvent = options.retry?.onEvent;
 		if (typeof options.timeout !== "undefined") {
 			if (options.timeout !== Infinity && !(Number.isSafeInteger(options.timeout) && options.timeout > 0)) {
-				throw new RangeError(`Argument \`options.timeout\` is not \`Infinity\`, or a number which is integer, positive, safe, and > 0!`);
+				throw new RangeError(`\`${options.timeout}\` (parameter \`options.timeout\`) is not \`Infinity\`, or a number which is integer, positive, safe, and > 0!`);
 			}
 			this.#timeout = options.timeout;
 		}
