@@ -40,7 +40,7 @@
 		"@hugoalh/http-header-retry-after": "1.0.1"
 	},
 	"devDependencies": {
-		"@types/node": "20.12.12",
+		"@types/node": "20.14.12",
 		"typescript": "^5.4.5"
 	},
 	"engines": {
